@@ -1,15 +1,14 @@
 // auditLog.js
-import { db } from "./firebase.js";
-import {
-  collection,
-  doc,
-  setDoc,
-  onSnapshot,
-  query,
-  orderBy,
-  serverTimestamp,
-} from "firebase/firestore";
-
+import { 
+  db, 
+  collection, 
+  doc, 
+  setDoc, 
+  onSnapshot, 
+  query, 
+  orderBy, 
+  serverTimestamp 
+} from "./firebase.js";
 // إضافة سجل جديد
 export async function addAuditLog(data) {
   const id = Date.now().toString(); // ID فريد
