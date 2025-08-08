@@ -632,12 +632,13 @@
       </main>
     </div>
 
-    <div id="activityPanel" class="fixed inset-y-0 right-0 w-64 shadow-lg transform translate-x-full transition-transform duration-300 z-50">
-      <div class="p-4 flex justify-between items-center border-b dark:border-slate-700">
+    <div id="activityOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-40"><!-- MODIFIED --></div>
+    <div id="activityPanel" class="fixed inset-y-0 right-0 w-64 transform translate-x-full transition-transform duration-300 z-50 bg-white dark:bg-slate-800 rounded-l-lg shadow-lg flex flex-col"><!-- MODIFIED -->
+      <div class="p-4 flex justify-between items-center border-b dark:border-slate-700"><!-- MODIFIED -->
         <h3 class="font-bold dark:text-white" data-translate="audit_log">Audit Log</h3>
         <button id="closeActivity" class="text-gray-400 hover:text-gray-600 dark:text-slate-300">&times;</button>
       </div>
-      <div id="activityList" class="p-4 space-y-2 overflow-y-auto h-full"></div>
+      <div id="activityList" class="p-4 space-y-2 overflow-y-auto flex-1"><!-- MODIFIED --></div>
     </div>
 
     <div id="notification" class="fixed top-4 left-4 w-80 rounded-lg shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out z-50">

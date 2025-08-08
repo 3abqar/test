@@ -385,10 +385,13 @@ export function updateActivityList(activities) {
         list.innerHTML = `<p class="text-gray-500 dark:text-slate-400 p-2">No recent activity.</p>`;
         return;
     }
-    activities.forEach(act => {
+    activities.forEach(act => { // MODIFIED
         const item = document.createElement('div');
         item.className = 'p-2 border-b dark:border-slate-700';
-        item.innerHTML = `<p class="text-sm dark:text-white">${act.text}</p><p class="text-xs text-gray-500 dark:text-slate-400">${new Date(act.timestamp).toLocaleString()} - ${act.user || ''} - ${act.device || ''}</p>`;
+        const message = act.text || act.action; // MODIFIED
+        const time = act.timestamp && act.timestamp.toDate ? act.timestamp.toDate() : new Date(act.timestamp); // MODIFIED
+        const meta = [act.user, act.device].filter(Boolean).join(' - '); // MODIFIED
+        item.innerHTML = `<p class="text-sm dark:text-white">${message}</p><p class="text-xs text-gray-500 dark:text-slate-400">${time.toLocaleString()}${meta ? ' - ' + meta : ''}</p>`; // MODIFIED
         list.appendChild(item);
     });
     setLanguage(currentLanguage);

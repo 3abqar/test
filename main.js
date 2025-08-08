@@ -1,7 +1,7 @@
 // main.js
 import { db, auth, salesCollection, customersCollection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, getDoc, setDoc, query, onAuthStateChanged, signInAnonymously } from './firebase.js';
 import * as UI from './ui.js';
-import { addAuditLog } from './auditLog.js';
+import { addAuditLog, listenToAuditLogs } from './auditLog.js'; // MODIFIED
 
 // --- Global Variables ---
 let salesData = [];
@@ -14,7 +14,7 @@ const rowsPerPage = 10;
 let customerSearchTerm = '';
 let filteredSales = null;
 let reminders = JSON.parse(localStorage.getItem('reminders') || '{}');
-let recentActivities = JSON.parse(localStorage.getItem('recentActivities') || '[]');
+let recentActivities = []; // MODIFIED
 let notifications = [];
 
 // --- TRANSLATION DATA ---
@@ -187,21 +187,24 @@ document.addEventListener("DOMContentLoaded", () => {
         UI.setCurrentLanguage(currentLanguage);
         UI.setLanguage(currentLanguage);
         
-        document.getElementById("date").valueAsDate = new Date();
+          document.getElementById("date").valueAsDate = new Date();
         document.getElementById("profitDateSelector").valueAsDate = new Date();
 
-        setupEventListeners();
-        UI.updateActivityList(recentActivities);
-        checkRemindersOnLoad();
+          setupEventListeners();
+          checkRemindersOnLoad();
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                loadDataAndSetupRealtimeListener();
-                UI.initializeAuditLog();
-            } else {
-                signInAnonymously(auth).catch((error) => UI.handleLoadingErrorUI(error));
-            }
-        });
+          onAuthStateChanged(auth, (user) => { // MODIFIED
+              if (user) { // MODIFIED
+                  loadDataAndSetupRealtimeListener();
+                  UI.initializeAuditLog();
+                  listenToAuditLogs((logs) => { // MODIFIED
+                      recentActivities = logs; // MODIFIED
+                      UI.updateActivityList(logs); // MODIFIED
+                  }); // MODIFIED
+              } else {
+                  signInAnonymously(auth).catch((error) => UI.handleLoadingErrorUI(error));
+              }
+          });
     } catch (error) {
         UI.handleLoadingErrorUI(error);
     }
@@ -265,16 +268,13 @@ function quickCreateOrder(name, number) {
     document.getElementById('whatsappNumber').value = number || '';
 }
 
-function addActivity(text) {
-    recentActivities.unshift({
-        text,
-        timestamp: Date.now(),
-        user: auth.currentUser ? auth.currentUser.uid : 'anonymous',
-        device: navigator.userAgent
-    });
-    recentActivities = recentActivities.slice(0,10);
-    localStorage.setItem('recentActivities', JSON.stringify(recentActivities));
-    UI.updateActivityList(recentActivities);
+function addActivity(text, extra = {}) { // MODIFIED
+    addAuditLog({ // MODIFIED
+        action: text, // MODIFIED
+        user: auth.currentUser ? auth.currentUser.uid : 'anonymous', // MODIFIED
+        device: navigator.userAgent, // MODIFIED
+        ...extra // MODIFIED
+    }); // MODIFIED
 }
 
 function addCustomerReminder(whatsapp, date, text) {
@@ -339,13 +339,13 @@ function setupEventListeners() {
       this.classList.add("active");
       document.querySelectorAll(".tab-content").forEach((content) => content.classList.add("hidden"));
       document.getElementById(this.dataset.tab).classList.remove("hidden");
-      const links = document.getElementById('navLinks');
-      if (links.classList.contains('max-h-96')) {
-          links.classList.add('max-h-0');
-          links.classList.remove('max-h-96');
-          const arrow = document.getElementById('mobileMenuArrow');
-          if (arrow) arrow.classList.remove('rotate-180');
-      }
+        const links = document.getElementById('navLinks');
+        if (window.innerWidth < 768 && links.classList.contains('max-h-96')) { // MODIFIED
+            links.classList.add('max-h-0'); // MODIFIED
+            links.classList.remove('max-h-96'); // MODIFIED
+            const arrow = document.getElementById('mobileMenuArrow');
+            if (arrow) arrow.classList.remove('rotate-180');
+        }
     });
   });
 
@@ -377,8 +377,19 @@ function setupEventListeners() {
           document.getElementById('mobileMenuArrow').classList.toggle('rotate-180');
       });
   }
-  document.getElementById('activityToggle').addEventListener('click', ()=>{ document.getElementById('activityPanel').classList.toggle('translate-x-full'); });
-  document.getElementById('closeActivity').addEventListener('click', ()=>{ document.getElementById('activityPanel').classList.add('translate-x-full'); });
+    const activityOverlay = document.getElementById('activityOverlay'); // MODIFIED
+    document.getElementById('activityToggle').addEventListener('click', ()=>{ // MODIFIED
+        document.getElementById('activityPanel').classList.remove('translate-x-full'); // MODIFIED
+        if (activityOverlay) activityOverlay.classList.remove('hidden'); // MODIFIED
+    });
+    document.getElementById('closeActivity').addEventListener('click', ()=>{ // MODIFIED
+        document.getElementById('activityPanel').classList.add('translate-x-full'); // MODIFIED
+        if (activityOverlay) activityOverlay.classList.add('hidden'); // MODIFIED
+    });
+    if (activityOverlay) activityOverlay.addEventListener('click', () => { // MODIFIED
+        document.getElementById('activityPanel').classList.add('translate-x-full'); // MODIFIED
+        activityOverlay.classList.add('hidden'); // MODIFIED
+    });
 
   // Modals Close Buttons
   document.getElementById("closeNotification").addEventListener("click", () => document.getElementById("notification").classList.add("-translate-x-full"));
@@ -422,13 +433,11 @@ async function handleSaveSale(e) {
     if (editingId) {
       await updateDoc(doc(db, "sales", editingId), saleData);
       UI.showNotification("Sale updated successfully!", "success");
-      addActivity(`Sale updated for ${saleData.clientName}`);
-      addAuditLog({ action: 'Sale Updated', amount: saleData.price, client: saleData.clientName });
+        addActivity(`Sale updated for ${saleData.clientName}`, { amount: saleData.price, client: saleData.clientName }); // MODIFIED
     } else {
       await addDoc(salesCollection, saleData);
       UI.showNotification("Sale saved successfully!", "success");
-      addActivity(`Sale added for ${saleData.clientName}`);
-      addAuditLog({ action: 'Sale Added', amount: saleData.price, client: saleData.clientName });
+        addActivity(`Sale added for ${saleData.clientName}`, { amount: saleData.price, client: saleData.clientName }); // MODIFIED
     }
 
     if (saleData.whatsappNumber) {
@@ -486,9 +495,9 @@ async function markAsPaid(saleId) {
         await updateDoc(doc(db, "sales", saleId), { paymentStatus: "paid" });
         UI.showNotification("Order marked as paid", "success");
         const sale = salesData.find(s => s.id === saleId);
-        if (sale) {
-            addAuditLog({ action: 'Payment Received', amount: sale.price, client: sale.clientName });
-        }
+          if (sale) { // MODIFIED
+              addActivity(`Payment received for ${sale.clientName}`, { amount: sale.price, client: sale.clientName }); // MODIFIED
+          }
     } catch (error) {
         console.error("Error marking as paid: ", error);
         UI.showNotification("Error updating order.", "error");
