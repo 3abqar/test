@@ -309,6 +309,43 @@ textarea:focus {
   margin-right: 12px;
 }
 
+/* Audit Log Styles */
+.audit-log {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+}
+.audit-log h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.audit-log ul {
+  max-height: 16rem;
+  overflow-y: auto;
+}
+.audit-log li {
+  font-size: 0.875rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.dark-mode .audit-log {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--dark-text);
+  backdrop-filter: blur(12px);
+}
+.dark-mode .audit-log li {
+  border-bottom-color: rgba(255,255,255,0.1);
+}
+@media (max-width: 640px) {
+  .audit-log {
+    padding: 1rem;
+  }
+}
+
 /* --------------------------------------------
    Responsive Adjustments for Small Screens
    -------------------------------------------- */
