@@ -1,6 +1,7 @@
 // main.js
 import { db, auth, salesCollection, customersCollection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, getDoc, setDoc, query, onAuthStateChanged, signInAnonymously } from './firebase.js';
 import * as UI from './ui.js';
+import { addAuditLog } from './auditLog.js';
 
 // --- Global Variables ---
 let salesData = [];
@@ -196,6 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 loadDataAndSetupRealtimeListener();
+                UI.initializeAuditLog();
             } else {
                 signInAnonymously(auth).catch((error) => UI.handleLoadingErrorUI(error));
             }
@@ -337,6 +339,13 @@ function setupEventListeners() {
       this.classList.add("active");
       document.querySelectorAll(".tab-content").forEach((content) => content.classList.add("hidden"));
       document.getElementById(this.dataset.tab).classList.remove("hidden");
+      const links = document.getElementById('navLinks');
+      if (links.classList.contains('max-h-96')) {
+          links.classList.add('max-h-0');
+          links.classList.remove('max-h-96');
+          const arrow = document.getElementById('mobileMenuArrow');
+          if (arrow) arrow.classList.remove('rotate-180');
+      }
     });
   });
 
@@ -414,10 +423,12 @@ async function handleSaveSale(e) {
       await updateDoc(doc(db, "sales", editingId), saleData);
       UI.showNotification("Sale updated successfully!", "success");
       addActivity(`Sale updated for ${saleData.clientName}`);
+      addAuditLog({ action: 'Sale Updated', amount: saleData.price, client: saleData.clientName });
     } else {
       await addDoc(salesCollection, saleData);
       UI.showNotification("Sale saved successfully!", "success");
       addActivity(`Sale added for ${saleData.clientName}`);
+      addAuditLog({ action: 'Sale Added', amount: saleData.price, client: saleData.clientName });
     }
 
     if (saleData.whatsappNumber) {
@@ -474,6 +485,10 @@ async function markAsPaid(saleId) {
     try {
         await updateDoc(doc(db, "sales", saleId), { paymentStatus: "paid" });
         UI.showNotification("Order marked as paid", "success");
+        const sale = salesData.find(s => s.id === saleId);
+        if (sale) {
+            addAuditLog({ action: 'Payment Received', amount: sale.price, client: sale.clientName });
+        }
     } catch (error) {
         console.error("Error marking as paid: ", error);
         UI.showNotification("Error updating order.", "error");

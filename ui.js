@@ -1,4 +1,5 @@
 // ui.js
+import { listenToAuditLogs } from './auditLog.js';
 let serviceTypeChart, salesTrendChart;
 let currentLanguage = "en"; // Default language, will be updated by main.js
 let translations = {}; // Will be populated by main.js
@@ -54,6 +55,23 @@ export function updateCharts(salesData) {
   salesTrendChart.options.scales.x.ticks.color = textColor;
   salesTrendChart.options.scales.y.ticks.color = textColor;
   salesTrendChart.update();
+}
+
+export function initializeAuditLog() {
+  const list = document.getElementById('audit-log-body');
+  if (!list) return;
+  listenToAuditLogs((logs) => {
+    list.innerHTML = '';
+    logs.forEach((log) => {
+      const li = document.createElement('li');
+      const time = log.timestamp && log.timestamp.toDate ? log.timestamp.toDate() : new Date();
+      const formatted = time.toLocaleString(currentLanguage === 'ar' ? 'ar-EG' : 'en-US');
+      const amount = typeof log.amount === 'number' ? formatCurrency(log.amount) : '';
+      const client = log.client ? ` - ${log.client}` : '';
+      li.textContent = `${formatted} - ${log.action}${client}${amount ? ' (' + amount + ')' : ''}`;
+      list.appendChild(li);
+    });
+  });
 }
 
 function salesRowContent(sale) {
