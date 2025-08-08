@@ -1,0 +1,346 @@
+/* ============================================
+  Custom CSS for Digital Sales Tracker
+  ============================================
+*/
+
+/* 1. CSS Variables (Root)
+  ------------------------------------
+*/
+:root {
+  --primary: #8a63d2; /* بنفسجي جديد يتناسب مع التصميم */
+  --primary-light: #4a90e2; /* أزرق للوضع الأبيض */
+  --accent: #7ed321;
+  --text: #1f2937; /* Default text color for Light Mode */
+  --dark-text: #f3f4f6; /* Text color for Dark Mode */
+  --light-bg-start: #f5f7fa;
+  --light-bg-end: #c3cfe2;
+}
+
+/* 2. Body and Font Styles
+  ------------------------------------
+*/
+body {
+  font-family: "Cairo", sans-serif;
+  color: var(--text);
+  background: linear-gradient(170deg, var(--light-bg-start) 0%, var(--light-bg-end) 100%);
+  transition: background-color 0.5s ease;
+}
+
+h1, h2, h3, h4, button, select {
+  font-family: "Montserrat", sans-serif;
+}
+
+/* 3. Header and Logo Styling
+  ------------------------------------
+*/
+header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.dark-mode header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.logo-img {
+  height: 48px;
+  width: 48px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: 2px solid white;
+  object-fit: cover;
+}
+
+/* 4. Navigation Link Style
+  ------------------------------------
+*/
+.nav-link.active {
+  color: var(--primary-light);
+  border-bottom: 3px solid var(--primary-light);
+  font-weight: 600;
+}
+.dark-mode .nav-link {
+    border-bottom: 3px solid transparent;
+}
+.dark-mode .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-weight: 600;
+  border-bottom: 3px solid transparent;
+}
+
+/* 5. Card Styling
+  ------------------------------------
+*/
+.stat-card {
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease-in-out;
+  background-color: rgba(255, 255, 255, 0.6); 
+  backdrop-filter: blur(10px);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Utility for directional margin in KPI cards */
+.kpi-content {
+  margin-inline-start: 1rem;
+}
+
+/* 6. Form Input Focus Style
+  ------------------------------------
+*/
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary-light) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3) !important;
+}
+.dark-mode input:focus,
+.dark-mode select:focus,
+.dark-mode textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(138, 99, 210, 0.4) !important;
+}
+
+/* 7. Dark Mode Styles - GLASSMORPHISM DESIGN
+  ------------------------------------
+*/
+.dark-mode {
+  --text: var(--dark-text); 
+  background: linear-gradient(135deg, #3a3897 0%, #2c2a72 40%, #1a1a4e 100%);
+}
+
+.dark-mode .stat-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.dark-mode .stat-card:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.dark-mode .bg-white,
+.dark-mode .bg-gray-50 {
+    background-color: transparent !important;
+}
+
+.dark-mode .border-gray-200 { border-color: rgba(255, 255, 255, 0.15); }
+.dark-mode .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255, 255, 255, 0.15); }
+
+/* 10. Action Button Styles (Corrected for both modes)
+  ------------------------------------ 
+*/
+.control-btn, .edit-btn, .delete-btn, .details-btn, .mark-paid-btn {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-left: 6px; 
+  cursor: pointer;
+  background-color: transparent;
+}
+.edit-btn { border-color: var(--primary-light); color: var(--primary-light); }
+.delete-btn { border-color: #dc2626; color: #dc2626; }
+.details-btn { border-color: #6b7280; color: #6b7280; }
+.mark-paid-btn { border-color: var(--accent); color: var(--accent); }
+
+.edit-btn:hover { background-color: var(--primary-light); color: white; }
+.delete-btn:hover { background-color: #dc2626; color: white; }
+.details-btn:hover { background-color: #6b7280; color: white; }
+.mark-paid-btn:hover { background-color: var(--accent); color: white; }
+
+.dark-mode .edit-btn,
+.dark-mode .delete-btn, 
+.dark-mode .details-btn, 
+.dark-mode .mark-paid-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: transparent;
+}
+
+.dark-mode .edit-btn { color: var(--primary); }
+.dark-mode .delete-btn { color: #ff6b6b; }
+.dark-mode .details-btn { color: #9ca3af; }
+.dark-mode .mark-paid-btn { color: var(--accent); }
+
+.dark-mode .edit-btn:hover { background-color: var(--primary); color: white; }
+.dark-mode .delete-btn:hover { background-color: #ff6b6b; color: white; }
+.dark-mode .details-btn:hover { background-color: #9ca3af; color: #1a1a4e; }
+.dark-mode .mark-paid-btn:hover { background-color: var(--accent); color: white; }
+
+.vip-badge {
+  background-color: #fbbf24;
+  color: #92400e;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-left: 4px;
+}
+.dark-mode .vip-badge {
+  background-color: #92400e;
+  color: #fff;
+}
+
+/* 13. New Dark Mode Toggle Styles
+  ------------------------------------
+*/
+.dark-mode-toggle-container {
+  position: relative;
+}
+
+.dark-mode-toggle-container label {
+  width: 60px;
+  height: 30px;
+  position: relative;
+  display: block;
+  background: #ebebeb;
+  border-radius: 200px;
+  box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.3), inset 0px -2px 5px rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.dark-mode-toggle-container label:after {
+  content: "";
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  background: linear-gradient(180deg, #ffcc89, #d8860b);
+  border-radius: 180px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+}
+
+.dark-mode-toggle-container svg {
+  position: absolute;
+  width: 18px;
+  top: 6px;
+  z-index: 100;
+  transition: 0.3s;
+}
+
+.dark-mode-toggle-container svg.sun {
+  left: 6px;
+  fill: white;
+}
+
+.dark-mode-toggle-container svg.moon {
+  left: 36px;
+  fill: #7e7e7e;
+}
+
+.dark-mode-toggle-container input {
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
+
+.dark-mode-toggle-container input:checked + label {
+  background: #1a1a4e;
+}
+
+.dark-mode-toggle-container input:checked + label:after {
+  left: 57px;
+  transform: translateX(-100%);
+  background: linear-gradient(180deg, #777, #3a3a3a);
+}
+
+.dark-mode-toggle-container input:checked + label svg.sun {
+  fill: #7e7e7e;
+}
+
+.dark-mode-toggle-container input:checked + label svg.moon {
+  fill: white;
+}
+
+/* ============================================
+  Styles for Loading Overlay
+  ============================================
+*/
+#loadingOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s ease-out;
+  background: linear-gradient(135deg, #3a3897 0%, #2c2a72 40%, #1a1a4e 100%);
+}
+
+#loadingOverlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Styling for new KPI Card Icons */
+.kpi-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px; /* Circle shape */
+}
+
+/* Styling for new Activity Feed */
+.activity-item {
+  display: flex;
+  align-items: center;
+}
+.activity-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  margin-right: 12px;
+}
+
+/* --------------------------------------------
+   Responsive Adjustments for Small Screens
+   -------------------------------------------- */
+@media (max-width: 640px) {
+  header {
+    text-align: center;
+  }
+
+  .logo-img {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+
+  nav .nav-link {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .dark-mode nav .nav-link {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* ============================================
+  Final Fix for Text Colors
+  ============================================
+*/
+/* This ensures that any utility classes for text color are overridden in dark mode */
+.dark-mode .text-gray-900,
+.dark-mode .text-gray-800,
+.dark-mode .text-gray-700,
+.dark-mode .text-gray-600,
+.dark-mode .text-gray-500,
+.dark-mode .text-black {
+  color: var(--dark-text) !important;
+}
