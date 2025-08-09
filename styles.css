@@ -67,6 +67,70 @@ header {
   border-bottom: 3px solid transparent;
 }
 
+#navLinks {
+  transform: translateX(100%);
+}
+#navLinks.max-h-96 {
+  transform: translateX(0);
+}
+
+/* Buttons */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background-color: var(--primary-light);
+  color: #fff;
+}
+.btn-primary:hover {
+  background-color: #3b82f6;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-light);
+  border: 1px solid var(--primary-light);
+}
+.btn-secondary:hover {
+  background-color: var(--primary-light);
+  color: #fff;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: #fff;
+}
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+/* Custom Select */
+.custom-select {
+  appearance: none;
+  background-color: inherit;
+}
+.select-arrow {
+  color: #6b7280;
+}
+.dark-mode .select-arrow {
+  color: var(--dark-text);
+}
+
+/* Table hover */
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.dark-mode .table-hover tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 /* 5. Card Styling
   ------------------------------------
 */
@@ -91,6 +155,26 @@ header {
 /* 6. Form Input Focus Style
   ------------------------------------
 */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: #fff;
+}
+.dark-mode input[type="text"],
+.dark-mode input[type="number"],
+.dark-mode input[type="date"],
+.dark-mode textarea,
+.dark-mode select {
+  background-color: #1e293b;
+  border-color: #475569;
+  color: var(--dark-text);
+}
+
 input:focus,
 select:focus,
 textarea:focus {
