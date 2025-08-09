@@ -1,0 +1,22 @@
+{
+  "name": "test1-main",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+     "test": "vitest --environment jsdom",
+  "dev": "vite",
+  "build": "vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "jsdom": "^26.1.0",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "firebase": "^12.1.0"
+  }
+}

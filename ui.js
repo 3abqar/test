@@ -1,8 +1,9 @@
-// ui.js
+// ui.js - الكود الكامل والنهائي
+
 import { listenToAuditLogs } from './auditLog.js';
 let serviceTypeChart, salesTrendChart;
-let currentLanguage = "en"; // Default language, will be updated by main.js
-let translations = {}; // Will be populated by main.js
+let currentLanguage = "ar";
+let translations = {};
 
 export function setTranslations(data) {
   translations = data;
@@ -26,14 +27,12 @@ export function updateCharts(salesData) {
   const isDarkMode = document.body.classList.contains("dark-mode");
   const textColor = isDarkMode ? "#f3f4f6" : "#374151";
 
-  // Service Type Chart
   const serviceCounts = salesData.reduce((acc, sale) => { acc[sale.serviceType] = (acc[sale.serviceType] || 0) + sale.price; return acc; }, {});
   serviceTypeChart.data.labels = Object.keys(serviceCounts);
   serviceTypeChart.data.datasets[0].data = Object.values(serviceCounts);
   serviceTypeChart.options.plugins.legend.labels.color = textColor;
   serviceTypeChart.update();
 
-  // Monthly Sales Trend Chart
   const monthlyData = {};
   salesData.forEach((sale) => {
     const month = sale.date.substring(0, 7);
@@ -47,9 +46,9 @@ export function updateCharts(salesData) {
       return new Date(year, month-1).toLocaleString(currentLanguage === 'ar' ? 'ar-EG' : 'en-US', {month: 'short', year: 'numeric'})
   });
   salesTrendChart.data.datasets[0].data = sortedMonths.map((m) => monthlyData[m].revenue);
-  salesTrendChart.data.datasets[0].label = translations[currentLanguage].revenue;
+  salesTrendChart.data.datasets[0].label = translations[currentLanguage]?.revenue || 'Revenue';
   salesTrendChart.data.datasets[1].data = sortedMonths.map((m) => monthlyData[m].profit);
-  salesTrendChart.data.datasets[1].label = translations[currentLanguage].profit;
+  salesTrendChart.data.datasets[1].label = translations[currentLanguage]?.profit || 'Profit';
 
   salesTrendChart.options.plugins.legend.labels.color = textColor;
   salesTrendChart.options.scales.x.ticks.color = textColor;
@@ -57,24 +56,24 @@ export function updateCharts(salesData) {
   salesTrendChart.update();
 }
 
-export function initializeAuditLog() {
+// الدالة الجديدة في ui.js (اسم جديد وبدون استماع)
+export function updateDashboardAuditLog(logs) {
   const list = document.getElementById('audit-log-body');
   if (!list) return;
-  listenToAuditLogs((logs) => {
-    list.innerHTML = '';
-    logs.forEach((log) => {
-      const li = document.createElement('li');
-      const time = log.timestamp && log.timestamp.toDate ? log.timestamp.toDate() : new Date();
-      const formatted = time.toLocaleString(currentLanguage === 'ar' ? 'ar-EG' : 'en-US');
-      const amount = typeof log.amount === 'number' ? formatCurrency(log.amount) : '';
-      const client = log.client ? ` - ${log.client}` : '';
-      li.textContent = `${formatted} - ${log.action}${client}${amount ? ' (' + amount + ')' : ''}`;
-      list.appendChild(li);
-    });
+  list.innerHTML = '';
+  logs.forEach((log) => {
+    const li = document.createElement('li');
+    const time = log.timestamp && log.timestamp.toDate ? log.timestamp.toDate() : new Date();
+    const formatted = time.toLocaleString(currentLanguage === 'ar' ? 'ar-EG' : 'en-US');
+    const amount = typeof log.amount === 'number' ? formatCurrency(log.amount) : '';
+    const client = log.client ? ` - ${log.client}` : '';
+    li.textContent = `${formatted} - ${log.action}${client}${amount ? ' (' + amount + ')' : ''}`;
+    list.appendChild(li);
   });
 }
 
 function salesRowContent(sale) {
+    const paymentStatusText = translations[currentLanguage]?.[sale.paymentStatus] || sale.paymentStatus;
     return `
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${formatDate(sale.date)}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm">${sale.serviceType}</td>
@@ -83,61 +82,13 @@ function salesRowContent(sale) {
         <td class="px-6 py-4 whitespace-nowrap text-sm ${sale.profit >= 0 ? "text-green-500" : "text-red-500"}">${formatCurrency(sale.profit)}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm">
             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${sale.paymentStatus === "paid" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"}">
-                ${translations[currentLanguage][sale.paymentStatus] || sale.paymentStatus}
+                ${paymentStatusText}
             </span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium actions-cell">
             <button class="edit-btn" data-id="${sale.id}" data-translate="edit"></button>
             <button class="delete-btn" data-id="${sale.id}" data-translate="delete"></button>
         </td>`;
-}
-
-export function renderSalesLog(dataToRender, editSaleCallback, deleteSaleCallback, pagination, onPageChange) {
-  const tableBody = document.getElementById("salesTableBody");
-  const existing = new Map();
-  Array.from(tableBody.children).forEach(tr => existing.set(tr.dataset.id, tr));
-
-  if (!dataToRender || dataToRender.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center" data-translate="no_sales_records_found"></td></tr>`;
-    document.getElementById('salesPagination').innerHTML = '';
-    setLanguage(currentLanguage);
-    return;
-  }
-
-  dataToRender.forEach(sale => {
-      const id = sale.id;
-      const content = salesRowContent(sale);
-      let row = existing.get(id);
-      if (row) {
-          if (row.dataset.hash !== content) {
-              row.innerHTML = content;
-              row.dataset.hash = content;
-          }
-          existing.delete(id);
-      } else {
-          row = document.createElement('tr');
-          row.className = "hover:bg-gray-50 dark:hover:bg-slate-700";
-          row.dataset.id = id;
-          row.dataset.hash = content;
-          row.innerHTML = content;
-          tableBody.appendChild(row);
-      }
-  });
-
-  existing.forEach(tr => tr.remove());
-
-  tableBody.querySelectorAll(".delete-btn").forEach(btn => btn.onclick = function(){ deleteSaleCallback(this.dataset.id); });
-  tableBody.querySelectorAll(".edit-btn").forEach(btn => btn.onclick = function(){ editSaleCallback(this.dataset.id); });
-
-  const pagDiv = document.getElementById('salesPagination');
-  pagDiv.innerHTML = `
-    <button id="prevSales" class="px-3 py-1 bg-gray-200 dark:bg-slate-700 rounded" ${pagination.currentPage === 1 ? 'disabled' : ''} data-translate="previous"></button>
-    <span class="dark:text-white">${pagination.currentPage} / ${pagination.totalPages}</span>
-    <button id="nextSales" class="px-3 py-1 bg-gray-200 dark:bg-slate-700 rounded" ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''} data-translate="next"></button>
-  `;
-  document.getElementById('prevSales').onclick = () => onPageChange(pagination.currentPage - 1);
-  document.getElementById('nextSales').onclick = () => onPageChange(pagination.currentPage + 1);
-  setLanguage(currentLanguage);
 }
 
 function customerRowContent(customer) {
@@ -153,10 +104,11 @@ function customerRowContent(customer) {
         typeKey = 'type_returning';
         badgeClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
     }
-    const warningIcon = daysInactive > 30 ? `<svg class="inline w-4 h-4 text-yellow-500 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" title="${translations[currentLanguage].inactive_tooltip}"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.1 0 1.98-.9 1.87-2L18.87 5c-.1-1.1-1-2-2.1-2H7.23c-1.1 0-2 .9-2.1 2L3.1 17c-.1 1.1.77 2 1.97 2z" /></svg>` : '';
+    const inactiveTooltip = translations[currentLanguage]?.inactive_tooltip || '';
+    const warningIcon = daysInactive > 30 ? `<svg class="inline w-4 h-4 text-yellow-500 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" title="${inactiveTooltip}"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.1 0 1.98-.9 1.87-2L18.87 5c-.1-1.1-1-2-2.1-2H7.23c-1.1 0-2 .9-2.1 2L3.1 17c-.1 1.1.77 2 1.97 2z" /></svg>` : '';
     return `
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-            ${customer.name} ${isVip ? '<span class="vip-badge" data-translate="vip">VIP</span>' : ''}
+            ${customer.name} ${isVip ? '<span class="vip-badge" data-translate="vip"></span>' : ''}
             <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${badgeClass}" data-translate="${typeKey}"></span>
             ${warningIcon}
         </td>
@@ -165,7 +117,7 @@ function customerRowContent(customer) {
         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">${customer.totalOrders || 0}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">${formatCurrency(customer.totalSpent)}</td>
         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium actions-cell space-x-2">
-            <button class="copy-phone" data-number="${customer.whatsappNumber}" title="${translations[currentLanguage].copy}">
+            <button class="copy-phone" data-number="${customer.whatsappNumber}" title="${translations[currentLanguage]?.copy || 'Copy'}">
                 <svg class="w-5 h-5 inline text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16h8M8 12h8m-6 8h6a2 2 0 002-2V6a2 2 0 00-2-2h-6M6 16H5a2 2 0 01-2-2V6a2 2 0 012-2h6"></path></svg>
             </button>
             <a href="https://wa.me/${customer.whatsappNumber}" target="_blank" class="open-whatsapp" title="WhatsApp">
@@ -179,60 +131,86 @@ function customerRowContent(customer) {
     `;
 }
 
+function renderPaginationControls(elementId, pagination, onPageChange) {
+  const pagDiv = document.getElementById(elementId);
+  if (!pagDiv) return;
+
+  if (pagination.totalPages <= 1) {
+    pagDiv.innerHTML = '';
+    return;
+  }
+
+  const prevText = translations[currentLanguage]?.previous || 'Previous';
+  const nextText = translations[currentLanguage]?.next || 'Next';
+  
+  pagDiv.innerHTML = `
+    <button id="prevBtn_${elementId}" class="px-3 py-1 bg-gray-200 dark:bg-slate-700 rounded" ${pagination.currentPage === 1 ? 'disabled' : ''}>
+        ${prevText}
+    </button>
+    <span class="dark:text-white">${pagination.currentPage} / ${pagination.totalPages}</span>
+    <button id="nextBtn_${elementId}" class="px-3 py-1 bg-gray-200 dark:bg-slate-700 rounded" ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}>
+        ${nextText}
+    </button>
+  `;
+
+  document.getElementById(`prevBtn_${elementId}`).onclick = () => onPageChange(pagination.currentPage - 1);
+  document.getElementById(`nextBtn_${elementId}`).onclick = () => onPageChange(pagination.currentPage + 1);
+}
+
+export function renderSalesLog(dataToRender, editSaleCallback, deleteSaleCallback, pagination, onPageChange) {
+  const tableBody = document.getElementById("salesTableBody");
+  tableBody.innerHTML = ""; 
+
+  if (!dataToRender || dataToRender.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center" data-translate="no_sales_records_found"></td></tr>`;
+    document.getElementById('salesPagination').innerHTML = '';
+    setLanguage(currentLanguage);
+    return;
+  }
+
+  dataToRender.forEach(sale => {
+      const row = tableBody.insertRow();
+      row.className = "hover:bg-gray-50 dark:hover:bg-slate-700";
+      row.dataset.id = sale.id;
+      row.innerHTML = salesRowContent(sale);
+      row.querySelector(".delete-btn").onclick = () => deleteSaleCallback(sale.id);
+      row.querySelector(".edit-btn").onclick = () => editSaleCallback(sale.id);
+  });
+
+  renderPaginationControls('salesPagination', pagination, onPageChange);
+  setLanguage(currentLanguage);
+}
+
 export function renderCustomerDatabase(customersArray, showCustomerDetailsCallback, pagination, onPageChange, quickOrderCallback) {
   const tableBody = document.getElementById("customersTableBody");
-  const existing = new Map();
-  Array.from(tableBody.children).forEach(tr => existing.set(tr.dataset.id, tr));
+  tableBody.innerHTML = "";
 
   if (!customersArray || customersArray.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center" data-translate="no_customer_records_found"></td></tr>`;
-    setLanguage(currentLanguage);
     document.getElementById('customersPagination').innerHTML = '';
+    setLanguage(currentLanguage);
     return;
   }
 
   customersArray.forEach(customer => {
-      const id = customer.whatsappNumber || customer.id;
-      const content = customerRowContent(customer);
-      let row = existing.get(id);
-      if (row) {
-          if (row.dataset.hash !== content) {
-              row.innerHTML = content;
-              row.dataset.hash = content;
-          }
-          existing.delete(id);
-      } else {
-          row = document.createElement('tr');
-          row.className = "hover:bg-gray-50 dark:hover:bg-slate-700";
-          row.dataset.id = id;
-          row.dataset.hash = content;
-          row.innerHTML = content;
-          tableBody.appendChild(row);
-      }
+      const row = tableBody.insertRow();
+      row.className = "hover:bg-gray-50 dark:hover:bg-slate-700";
+      row.dataset.id = customer.whatsappNumber || customer.id;
+      row.innerHTML = customerRowContent(customer);
+
+      row.querySelector(".details-btn").onclick = () => showCustomerDetailsCallback(customer.whatsappNumber);
+      row.querySelector('.copy-phone').onclick = () => { navigator.clipboard.writeText(customer.whatsappNumber); showNotification(translations[currentLanguage]?.copied || 'Copied!', 'success'); };
+      row.querySelector('.quick-order').onclick = () => quickOrderCallback(customer.name, customer.whatsappNumber);
   });
 
-  existing.forEach(tr => tr.remove());
-
-  tableBody.querySelectorAll(".details-btn").forEach(btn => btn.onclick = function(){ showCustomerDetailsCallback(this.dataset.id); });
-  tableBody.querySelectorAll('.copy-phone').forEach(btn => btn.onclick = () => { navigator.clipboard.writeText(btn.dataset.number); showNotification(translations[currentLanguage].copied, 'success'); });
-  tableBody.querySelectorAll('.quick-order').forEach(btn => btn.onclick = () => { quickOrderCallback(btn.dataset.name, btn.dataset.number); });
-
-  const pagDiv = document.getElementById('customersPagination');
-  pagDiv.innerHTML = `
-    <button id="prevCustomers" class="px-3 py-1 bg-gray-200 dark:bg-slate-700 rounded" ${pagination.currentPage === 1 ? 'disabled' : ''} data-translate="previous"></button>
-    <span class="dark:text-white">${pagination.currentPage} / ${pagination.totalPages}</span>
-    <button id="nextCustomers" class="px-3 py-1 bg-gray-200 dark:bg-slate-700 rounded" ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''} data-translate="next"></button>
-  `;
-  document.getElementById('prevCustomers').onclick = () => onPageChange(pagination.currentPage - 1);
-  document.getElementById('nextCustomers').onclick = () => onPageChange(pagination.currentPage + 1);
+  renderPaginationControls('customersPagination', pagination, onPageChange);
   setLanguage(currentLanguage);
 }
 
-
 export function renderDebtManagement(salesData, markAsPaidCallback) {
   const tableBody = document.getElementById("debtTableBody");
+  tableBody.innerHTML = ""; 
   const unpaidOrders = salesData.filter((sale) => sale.paymentStatus === "unpaid");
-  tableBody.innerHTML = "";
 
   if (unpaidOrders.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center" data-translate="no_unpaid_orders"></td></tr>`;
@@ -241,20 +219,31 @@ export function renderDebtManagement(salesData, markAsPaidCallback) {
   }
 
   unpaidOrders.forEach((sale) => {
-    const row = document.createElement("tr");
+    const row = tableBody.insertRow();
     row.className = "hover:bg-gray-50 dark:hover:bg-slate-700";
-    row.innerHTML = `
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${formatDate(sale.date)}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm">${sale.clientName}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500 font-semibold">${formatCurrency(sale.price)}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium actions-cell">
-            <button class="mark-paid-btn" data-id="${sale.id}" data-translate="mark_as_paid"></button>
-        </td>
-    `;
-    tableBody.appendChild(row);
-  });
+    
+    const cellDate = row.insertCell();
+    cellDate.className = "px-6 py-4 whitespace-nowrap text-sm font-medium";
+    cellDate.textContent = formatDate(sale.date);
+    
+    const cellClient = row.insertCell();
+    cellClient.className = "px-6 py-4 whitespace-nowrap text-sm";
+    cellClient.textContent = sale.clientName;
 
-  document.querySelectorAll(".mark-paid-btn").forEach((btn) => btn.addEventListener("click", function () { markAsPaidCallback(this.dataset.id); }));
+    const cellAmount = row.insertCell();
+    cellAmount.className = "px-6 py-4 whitespace-nowrap text-sm text-red-500 font-semibold";
+    cellAmount.textContent = formatCurrency(sale.price);
+
+    const cellActions = row.insertCell();
+    cellActions.className = "px-6 py-4 whitespace-nowrap text-right text-sm font-medium actions-cell";
+    const button = document.createElement('button');
+    button.className = "mark-paid-btn";
+    button.dataset.id = sale.id;
+    button.dataset.translate = "mark_as_paid";
+    button.onclick = () => markAsPaidCallback(sale.id);
+    cellActions.appendChild(button);
+  });
+  
   setLanguage(currentLanguage);
 }
 
@@ -264,21 +253,17 @@ export function updateKpiCards(salesData, customersData) {
     
     const thisMonthSales = salesData.filter(s => s.date.substring(0, 7) === thisMonthStr);
 
-    // 1. Calculate Monthly Revenue
     const monthlyRevenue = thisMonthSales.reduce((sum, s) => sum + s.price, 0);
     document.getElementById("monthlyRevenue").textContent = monthlyRevenue.toFixed(2);
 
-    // 2. Calculate Profit Margin (Total)
     const totalRevenue = salesData.reduce((sum, s) => sum + s.price, 0);
     const totalProfit = salesData.reduce((sum, s) => sum + s.profit, 0);
     const profitMargin = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : '0.0';
     document.getElementById("profitMargin").textContent = profitMargin;
     
-    // 3. Calculate Average Sale Value
     const avgSaleValue = thisMonthSales.length > 0 ? monthlyRevenue / thisMonthSales.length : 0;
     document.getElementById("avgSaleValue").textContent = avgSaleValue.toFixed(2);
     
-    // 4. Calculate New Customers This Month
     const salesByCustomer = {};
     salesData.forEach(sale => {
         if (sale.whatsappNumber) {
@@ -308,10 +293,13 @@ export function updateKpiCards(salesData, customersData) {
     const inactiveCount = inactiveList.length;
     const newPercent = totalCustomers > 0 ? Math.round((newCount/totalCustomers)*100) : 0;
     const returningPercent = totalCustomers > 0 ? Math.round((returningCount/totalCustomers)*100) : 0;
+    
     const nvEl = document.getElementById('newVsReturning');
     if (nvEl) nvEl.textContent = `${newPercent}% / ${returningPercent}%`;
+    
     const inactEl = document.getElementById('inactiveClientsCount');
     if (inactEl) inactEl.textContent = inactiveCount;
+
     const inactListEl = document.getElementById('inactiveClientsList');
     if (inactListEl) inactListEl.innerHTML = inactiveList.slice(0,3).map(c=>`<li>${c.name}</li>`).join('');
 
@@ -335,12 +323,12 @@ export function updateKpiCards(salesData, customersData) {
 export function renderActivityFeed(salesData) {
     const feedContainer = document.getElementById("activityFeed");
     if (!feedContainer) return;
-    feedContainer.innerHTML = ""; // Clear old items
+    feedContainer.innerHTML = "";
 
     const recentSales = salesData.slice(0, 5);
 
     if (recentSales.length === 0) {
-        feedContainer.innerHTML = `<p class="text-gray-500 dark:text-slate-400">No recent activity.</p>`;
+        feedContainer.innerHTML = `<p class="text-gray-500 dark:text-slate-400" data-translate="no_recent_activity"></p>`;
         return;
     }
 
@@ -385,13 +373,13 @@ export function updateActivityList(activities) {
         list.innerHTML = `<p class="text-gray-500 dark:text-slate-400 p-2">No recent activity.</p>`;
         return;
     }
-    activities.forEach(act => { // MODIFIED
+    activities.forEach(act => {
         const item = document.createElement('div');
         item.className = 'p-2 border-b dark:border-slate-700';
-        const message = act.text || act.action; // MODIFIED
-        const time = act.timestamp && act.timestamp.toDate ? act.timestamp.toDate() : new Date(act.timestamp); // MODIFIED
-        const meta = [act.user, act.device].filter(Boolean).join(' - '); // MODIFIED
-        item.innerHTML = `<p class="text-sm dark:text-white">${message}</p><p class="text-xs text-gray-500 dark:text-slate-400">${time.toLocaleString()}${meta ? ' - ' + meta : ''}</p>`; // MODIFIED
+        const message = act.action;
+        const time = act.timestamp && act.timestamp.toDate ? act.timestamp.toDate() : new Date(act.timestamp);
+        const meta = [act.user, act.device].filter(Boolean).join(' - ');
+        item.innerHTML = `<p class="text-sm dark:text-white">${message}</p><p class="text-xs text-gray-500 dark:text-slate-400">${time.toLocaleString()}${meta ? ' - ' + meta : ''}</p>`;
         list.appendChild(item);
     });
     setLanguage(currentLanguage);
@@ -401,7 +389,6 @@ export function updateDashboardUI(salesData, dailyGoal) {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
     
-    // This function now only handles the second row of stats and the goal progress bar
     document.getElementById("dashboardTotalOrders").textContent = salesData.length;
     const serviceCounts = salesData.reduce((acc, sale) => { acc[sale.serviceType] = (acc[sale.serviceType] || 0) + 1; return acc; }, {});
     const topService = Object.keys(serviceCounts).reduce((a, b) => serviceCounts[a] > serviceCounts[b] ? a : b, "N/A");
@@ -418,13 +405,13 @@ export function updateDashboardUI(salesData, dailyGoal) {
     const goalPercentage = dailyGoal > 0 ? Math.round(Math.min((todayProfit / dailyGoal) * 100, 100)) : 0;
 
     const dailyGoalProgress = document.getElementById("dailyGoalProgress");
-    if(dailyGoalProgress) { // Check if element exists before updating
+    if(dailyGoalProgress) {
         dailyGoalProgress.style.width = `${goalPercentage}%`;
     }
 
     const goalTextElement = document.getElementById("dailyGoalFullText");
     if(goalTextElement) {
-        const sentenceTemplate = translations[currentLanguage].daily_goal_sentence || "% of profit goal";
+        const sentenceTemplate = translations[currentLanguage]?.daily_goal_sentence || "% of profit goal";
         goalTextElement.textContent = `${goalPercentage}${sentenceTemplate}`;
     }
 
@@ -470,7 +457,7 @@ export function renderServiceProfitability(salesData) {
                 body.appendChild(row);
             });
     }
-    setLanguage(currentLanguage); // Re-apply translations for new elements
+    setLanguage(currentLanguage);
 }
 
 export function showDeleteConfirmationUI(confirmDeleteCallback) {
@@ -478,20 +465,19 @@ export function showDeleteConfirmationUI(confirmDeleteCallback) {
     dialog.classList.remove("hidden");
     const confirmBtn = document.getElementById("confirmDeleteBtn");
     
-    const confirmAction = () => {
-        confirmDeleteCallback();
-        dialog.classList.add("hidden");
-    };
-
     const newConfirmBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-    newConfirmBtn.addEventListener("click", confirmAction, { once: true });
+    newConfirmBtn.addEventListener("click", confirmDeleteCallback, { once: true });
+    
     newConfirmBtn.setAttribute('data-translate', 'delete');
     setLanguage(currentLanguage); 
 }
 
 export function hideDeleteConfirmationUI() {
     document.getElementById("deleteConfirmationModal").classList.add("hidden");
+    const confirmBtn = document.getElementById("confirmDeleteBtn");
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
 }
 
 export function fillSaleForm(sale) {
@@ -537,12 +523,14 @@ export function handleLoadingErrorUI(error) {
     const loadingMessage = document.getElementById('loadingMessage');
     const loadingError = document.getElementById('loadingError');
     console.error("Firebase Initialization Error:", error);
+    const errorText = translations[currentLanguage]?.firebase_error || "Connection to database failed.";
     loadingMessage.classList.add('hidden');
-    loadingError.textContent = translations[currentLanguage].firebase_error;
+    loadingError.textContent = errorText;
     loadingError.classList.remove('hidden');
 }
 
 export function setLanguage(lang) {
+  currentLanguage = lang;
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
 
@@ -557,22 +545,23 @@ export function setLanguage(lang) {
     el.textContent = translations[lang].currency;
   });
 
-  const profitGoalInput = document.getElementById('profitGoalInput');
-  if (profitGoalInput) {
-    profitGoalInput.placeholder = translations[lang].profit_goal_placeholder;
+  const placeHolderMapping = {
+    'profitGoalInput': 'profit_goal_placeholder',
+    'inactiveCustomersList': 'inactive_customers_placeholder',
+    'customerSearch': 'search',
   }
-  const inactiveCustomersList = document.getElementById('inactiveCustomersList');
-  if (inactiveCustomersList) {
-    inactiveCustomersList.placeholder = translations[lang].inactive_customers_placeholder;
-  }
-  const customerSearch = document.getElementById('customerSearch');
-  if (customerSearch) {
-    customerSearch.placeholder = translations[lang].search;
+  
+  for (const [id, key] of Object.entries(placeHolderMapping)) {
+      const element = document.getElementById(id);
+      if (element && translations[lang]?.[key]) {
+          element.placeholder = translations[lang][key];
+      }
   }
 }
 
 export function formatCurrency(value) {
-  return `${(value || 0).toFixed(2)} ${translations[currentLanguage].currency}`;
+  const currencySymbol = translations[currentLanguage]?.currency || 'EGP';
+  return `${(value || 0).toFixed(2)} ${currencySymbol}`;
 }
 
 export function formatDate(dateString) {
@@ -603,18 +592,18 @@ export function showCustomerDetailsUI(customer, history, totalProfit, avgProfit,
     renderCustomerTagsUI(customer, removeTagCallback);
     const addTagBtn = document.getElementById("addTagBtn");
     const newTagInput = document.getElementById("newTagInput");
-    addTagBtn.onclick = () => addTagCallback(customer.whatsappNumber, newTagInput.value.trim());
+    addTagBtn.onclick = () => { addTagCallback(customer.whatsappNumber, newTagInput.value.trim()); newTagInput.value = ''; };
 
     renderCustomerNotesUI(customer);
     const addNoteBtn = document.getElementById("addNoteBtn");
     const newNoteInput = document.getElementById("newNoteInput");
-    addNoteBtn.onclick = () => addNoteCallback(customer.whatsappNumber, newNoteInput.value.trim());
+    addNoteBtn.onclick = () => { addNoteCallback(customer.whatsappNumber, newNoteInput.value.trim()); newNoteInput.value = ''; };
 
     renderCustomerRemindersUI(reminders, customer.whatsappNumber, removeReminderCallback);
     const addReminderBtn = document.getElementById("addReminderBtn");
     const newReminderDate = document.getElementById("newReminderDate");
     const newReminderText = document.getElementById("newReminderText");
-    addReminderBtn.onclick = () => addReminderCallback(customer.whatsappNumber, newReminderDate.value, newReminderText.value.trim());
+    addReminderBtn.onclick = () => { addReminderCallback(customer.whatsappNumber, newReminderDate.value, newReminderText.value.trim()); newReminderText.value = ''; };
 
     document.getElementById("customerDetailsModal").classList.remove("hidden");
     setLanguage(currentLanguage);
@@ -630,19 +619,18 @@ export function renderCustomerTagsUI(customer, removeTagCallback) {
     if (customer.tags && customer.tags.length > 0) {
         customer.tags.forEach(tag => {
             const badge = document.createElement("span");
-            badge.className = "tag-badge";
+            badge.className = "inline-flex items-center px-2 py-1 mr-2 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300";
             badge.textContent = tag;
             const removeBtn = document.createElement("button");
             removeBtn.className = "ml-2 text-red-500 hover:text-red-700";
             removeBtn.innerHTML = "&times;";
             removeBtn.onclick = () => removeTagCallback(customer.whatsappNumber, tag);
             badge.appendChild(removeBtn);
-            tagsContainer.appendChild(badge);
+tagsContainer.appendChild(badge);
         });
     } else {
         tagsContainer.textContent = "No tags yet.";
     }
-    setLanguage(currentLanguage);
 }
 
 export function renderCustomerNotesUI(customer) {
@@ -651,14 +639,13 @@ export function renderCustomerNotesUI(customer) {
     if (customer.notes && customer.notes.length > 0) {
         customer.notes.sort((a,b) => b.timestamp - a.timestamp).forEach(note => {
             const noteEl = document.createElement("div");
-            noteEl.className = "p-2 bg-gray-100 dark:bg-slate-700 rounded-md";
+            noteEl.className = "p-2 bg-gray-100 dark:bg-slate-600 rounded-md";
             noteEl.innerHTML = `<p class="text-sm">${note.text}</p><p class="text-xs text-gray-500 dark:text-slate-400 mt-1">${new Date(note.timestamp).toLocaleString()}</p>`;
             notesContainer.appendChild(noteEl);
         });
     } else {
         notesContainer.textContent = "No notes yet.";
     }
-    setLanguage(currentLanguage);
 }
 
 export function renderCustomerRemindersUI(reminders, whatsapp, removeReminderCallback) {
@@ -667,26 +654,26 @@ export function renderCustomerRemindersUI(reminders, whatsapp, removeReminderCal
     if (reminders && reminders.length > 0) {
         reminders.forEach((rem, index) => {
             const el = document.createElement('div');
-            el.className = 'p-2 bg-gray-100 dark:bg-slate-700 rounded-md flex justify-between items-center';
+            el.className = 'p-2 bg-gray-100 dark:bg-slate-600 rounded-md flex justify-between items-center';
             el.innerHTML = `<span class="text-sm">${rem.date}: ${rem.text}</span><button class="text-red-500" data-index="${index}">&times;</button>`;
+            el.querySelector('button').onclick = () => removeReminderCallback(whatsapp, index);
             container.appendChild(el);
         });
-        container.querySelectorAll('button').forEach(btn => btn.onclick = () => removeReminderCallback(whatsapp, btn.dataset.index));
     } else {
         container.textContent = 'No reminders yet.';
     }
-    setLanguage(currentLanguage);
 }
 
 export function updatePLReportResult(period, income, expenses, net) {
     const resultDiv = document.getElementById('plReportResult');
+    const trans = translations[currentLanguage];
     resultDiv.innerHTML = `
         <h4 class="font-bold mb-2">${period.charAt(0).toUpperCase() + period.slice(1)} Report</h4>
-        <p><strong>${translations[currentLanguage].total_income}:</strong> ${formatCurrency(income)}</p>
-        <p><strong>${translations[currentLanguage].total_expenses}:</strong> ${formatCurrency(expenses)}</p>
+        <p><strong>${trans.total_income}:</strong> ${formatCurrency(income)}</p>
+        <p><strong>${trans.total_expenses}:</strong> ${formatCurrency(expenses)}</p>
         <hr class="my-2 dark:border-slate-600">
         <p class="font-bold ${net >= 0 ? 'text-green-500' : 'text-red-500'}">
-            <strong>${net >= 0 ? translations[currentLanguage].net_profit : translations[currentLanguage].net_loss}:</strong>
+            <strong>${net >= 0 ? trans.net_profit : trans.net_loss}:</strong>
             ${formatCurrency(Math.abs(net))}
         </p>
     `;
@@ -702,18 +689,19 @@ export function updateInactiveCustomersList(inactiveCustomers) {
 
 export function updateGoalSimulatorResult(goal, serviceStats) {
     const resultDiv = document.getElementById('goalSimulatorResult');
+    const trans = translations[currentLanguage];
     if (!goal) {
-        resultDiv.innerHTML = `<p class="text-red-500">Please enter a valid profit goal.</p>`;
+        resultDiv.innerHTML = `<p class="text-red-500">${trans.profit_goal_placeholder}</p>`;
         setLanguage(currentLanguage);
         return;
     }
 
-    let resultHTML = `<p class="mb-2">${translations[currentLanguage].goal_sim_intro_1} <strong>${formatCurrency(goal)}</strong>, ${translations[currentLanguage].goal_sim_intro_2}</p><ul class="list-disc list-inside">`;
+    let resultHTML = `<p class="mb-2">${trans.goal_sim_intro_1} <strong>${formatCurrency(goal)}</strong>, ${trans.goal_sim_intro_2}</p><ul class="list-disc list-inside">`;
     for (const service in serviceStats) {
         const avgProfit = serviceStats[service].profit / serviceStats[service].count;
         if (avgProfit > 0) {
             const salesNeeded = Math.ceil(goal / avgProfit);
-            resultHTML += `<li><strong>${salesNeeded}</strong> ${translations[currentLanguage].goal_sim_orders_of} '${service}'</li>`;
+            resultHTML += `<li><strong>${salesNeeded}</strong> ${trans.goal_sim_orders_of} '${service}'</li>`;
         }
     }
     resultHTML += `</ul>`;
