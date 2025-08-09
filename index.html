@@ -590,7 +590,17 @@
                     <div id="plReportResult" class="hidden mt-4 p-4 border rounded-md dark:border-slate-600">
                         </div>
                 </div>
-
+<div class="stat-card rounded-lg p-6 mt-6">
+    <h3 class="text-lg font-bold mb-4" data-translate="customer_data_management"></h3>
+    <p class="text-sm text-gray-600 dark:text-slate-400 mb-4" data-translate="import_helper_text"></p>
+    <div class="flex flex-col sm:flex-row items-center gap-4">
+        <input type="file" id="csvFileInput" accept=".csv" class="flex-grow w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white">
+        <div class="flex-shrink-0 flex gap-2 w-full sm:w-auto">
+             <button id="importCsvBtn" class="w-full sm:w-auto px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600" data-translate="import"></button>
+             <button id="deleteImportedBtn" class="w-full sm:w-auto px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600" data-translate="delete_imported"></button>
+        </div>
+    </div>
+</div>
                 <div class="stat-card rounded-lg p-6">
                     <h3 class="text-lg font-bold mb-4" data-translate="whatsapp_marketing">WhatsApp Marketing</h3>
                     <div class="flex items-center gap-4 mb-4">

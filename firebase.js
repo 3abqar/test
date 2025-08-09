@@ -1,7 +1,11 @@
-// firebase.js - الكود الجديد
+// firebase.js - الكود الكامل والصحيح
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, getDoc, setDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { 
+    getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, 
+    updateDoc, getDoc, setDoc, query, where, getDocs, writeBatch, 
+    orderBy, serverTimestamp 
+} from "firebase/firestore";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
 const firebaseConfig = {
@@ -25,6 +29,9 @@ const customersCollection = collection(db, 'customers');
 export {
   db, auth, salesCollection, customersCollection, onSnapshot, addDoc, doc,
   deleteDoc, updateDoc, getDoc, setDoc, query, onAuthStateChanged,
-  signInAnonymously, orderBy, serverTimestamp,
-  collection
+  signInAnonymously, orderBy, serverTimestamp, collection,
+  // --- الإضافات الجديدة ---
+  where, 
+  getDocs, 
+  writeBatch
 };

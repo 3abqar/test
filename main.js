@@ -1,7 +1,6 @@
 // main.js - الكود الكامل والنهائي
 
-import { db, auth, salesCollection, customersCollection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, getDoc, setDoc, query, onAuthStateChanged, signInAnonymously } from './firebase.js';
-import * as UI from './ui.js';
+import { db, auth, salesCollection, customersCollection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, getDoc, setDoc, query, where, getDocs, writeBatch, onAuthStateChanged, signInAnonymously } from './firebase.js';import * as UI from './ui.js';
 import { addAuditLog, listenToAuditLogs } from './auditLog.js';
 
 // --- Global Variables ---
@@ -19,6 +18,7 @@ let recentActivities = [];
 let notifications = [];
 
 // --- TRANSLATION DATA ---
+// main.js - استبدل كائن الترجمة القديم بهذا الكائن الكامل
 const translations = {
   en: {
     app_title: "Abqar Store Sales",
@@ -44,7 +44,6 @@ const translations = {
     whatsapp_number: "WhatsApp Number (Optional)", payment_status: "Payment Status",
     paid: "Paid", unpaid: "Unpaid", notes: "Notes (Optional)", save_sale: "Save Sale",
     sales_history: "Sales History", profit: "Profit", status: "Status",
-
     no_sales_records_found: "No sales records found",
     customer_database: "Customer Database", customer: "Customer", whatsapp: "WhatsApp",
     last_purchase: "Last Purchase", total_orders: "Total Orders", total_spent: "Total Spent",
@@ -90,6 +89,11 @@ const translations = {
     basket_analysis: "Basket Analysis", analyze: "Analyze",
     loading_data: "Loading Data...",
     firebase_error: "Connection to database failed. Please check your Firebase configuration and internet connection.",
+    // -- الترجمات الجديدة --
+    customer_data_management: "Customer Data Management",
+    import_helper_text: "Export your contacts from Google as a Google CSV, then upload the file here.",
+    import: "Import",
+    delete_imported: "Delete Imported",
   },
   ar: {
     app_title: "مبيعات متجر عبقر",
@@ -160,6 +164,11 @@ const translations = {
     basket_analysis: "تحليل السلة", analyze: "تحليل",
     loading_data: "جاري تحميل البيانات...",
     firebase_error: "فشل الاتصال بقاعدة البيانات. يرجى التحقق من إعدادات Firebase واتصالك بالإنترنت.",
+    // -- الترجمات الجديدة --
+    customer_data_management: "إدارة بيانات العملاء",
+    import_helper_text: "قم بتصدير جهات الاتصال من جوجل بصيغة Google CSV، ثم قم برفع الملف هنا.",
+    import: "استيراد",
+    delete_imported: "حذف المستوردين",
   }
 };
 
@@ -356,9 +365,12 @@ function setupEventListeners() {
   document.querySelectorAll(".nav-link").forEach((link) => {
     link.addEventListener("click", function () {
       document.querySelectorAll(".nav-link").forEach((l) => l.classList.remove("active"));
+      document.getElementById("deleteImportedBtn").addEventListener("click", handleDeleteImportedCustomers);
+
       this.classList.add("active");
       document.querySelectorAll(".tab-content").forEach((content) => content.classList.add("hidden"));
       document.getElementById(this.dataset.tab).classList.remove("hidden");
+      document.getElementById("importCsvBtn").addEventListener("click", handleImportCustomers);
         const links = document.getElementById('navLinks');
         if (window.innerWidth < 768 && links.classList.contains('max-h-96')) {
             links.classList.add('max-h-0');
@@ -812,4 +824,118 @@ function analyzeBaskets() {
     
     const sortedPairs = Object.entries(pairs).sort((a,b) => b[1] - a[1]);
     UI.updateBasketAnalysisResult(sortedPairs);
+}
+async function handleImportCustomers() {
+    const fileInput = document.getElementById('csvFileInput');
+    if (fileInput.files.length === 0) {
+        UI.showNotification("الرجاء اختيار ملف أولاً", "error");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async function(event) {
+        const csvData = event.target.result;
+        const lines = csvData.split('\n');
+        const headers = lines[0].split(',').map(h => h.trim());
+
+        const nameIndex = headers.findIndex(h => h.includes("Name"));
+        const phoneIndex = headers.findIndex(h => h.includes("Phone 1 - Value"));
+
+        if (nameIndex === -1 || phoneIndex === -1) {
+            UI.showNotification("لم يتم العثور على أعمدة الاسم أو الرقم في الملف", "error");
+            return;
+        }
+
+        const allCustomers = [];
+        for (let i = 1; i < lines.length; i++) {
+            const data = lines[i].split(',');
+            const name = data[nameIndex]?.trim();
+            const phone = data[phoneIndex]?.trim().replace(/\s+/g, '');
+            if (name && phone) {
+                allCustomers.push({ name, phone });
+            }
+        }
+
+        const batchSize = 400; // سنقوم بمعالجة 400 عميل في كل دفعة
+        let importedCount = 0;
+        
+        UI.showNotification("بدء عملية الاستيراد... قد تستغرق هذه العملية عدة دقائق.", "info");
+
+        for (let i = 0; i < allCustomers.length; i += batchSize) {
+            const batch = allCustomers.slice(i, i + batchSize);
+            
+            const promises = batch.map(customer => {
+                const customerRef = doc(db, "customers", customer.phone);
+                return setDoc(customerRef, {
+                    name: customer.name,
+                    whatsappNumber: customer.phone,
+                    tags: ["مستورد"], // علامة مميزة للعملاء المستوردين
+                    notes: []
+                }, { merge: true });
+            });
+
+            await Promise.all(promises);
+            importedCount += batch.length;
+            
+            // تحديث الإشعار لإظهار التقدم
+            UI.showNotification(`جاري الاستيراد... تم حفظ ${importedCount} من ${allCustomers.length} عميل`, "info");
+
+            // انتظار ثانية واحدة قبل معالجة الدفعة التالية
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        
+        UI.showNotification(`اكتمل الاستيراد بنجاح! تم حفظ ${importedCount} عميل.`, "success");
+        fileInput.value = ''; // تفريغ حقل الملف
+    };
+
+    reader.readAsText(file);
+}
+// main.js - أضف هذه الدالة الجديدة
+async function handleDeleteImportedCustomers() {
+    const confirmation = confirm("هل أنت متأكد أنك تريد حذف جميع العملاء الذين تم استيرادهم؟ لا يمكن التراجع عن هذا الإجراء.");
+    if (!confirmation) {
+        return;
+    }
+
+    UI.showNotification("بدء عملية الحذف... قد تستغرق عدة دقائق.", "info");
+
+    try {
+        // إنشاء استعلام لجلب العملاء الذين لديهم علامة "مستورد" فقط
+        const q = query(customersCollection, where("tags", "array-contains", "مستورد"));
+        const querySnapshot = await getDocs(q);
+
+        const customersToDelete = querySnapshot.docs;
+        const totalToDelete = customersToDelete.length;
+        let deletedCount = 0;
+
+        if (totalToDelete === 0) {
+            UI.showNotification("ไม่พบลูกค้าที่นำเข้าที่จะลบ", "info"); // لا يوجد عملاء مستوردون للحذف
+            return;
+        }
+
+        const batchSize = 400; // سنقوم بحذف 400 في كل دفعة
+
+        for (let i = 0; i < totalToDelete; i += batchSize) {
+            const batch = customersToDelete.slice(i, i + batchSize);
+            const deleteBatch = writeBatch(db);
+
+            batch.forEach(docSnapshot => {
+                deleteBatch.delete(docSnapshot.ref);
+            });
+
+            await deleteBatch.commit();
+            deletedCount += batch.length;
+
+            UI.showNotification(`جاري الحذف... تم حذف ${deletedCount} من ${totalToDelete} عميل`, "info");
+            await new Promise(resolve => setTimeout(resolve, 1000)); // انتظار ثانية بين الدفعات
+        }
+
+        UI.showNotification(`اكتمل الحذف بنجاح! تم حذف ${deletedCount} عميل.`, "success");
+
+    } catch (error) {
+        console.error("Error deleting imported customers: ", error);
+        UI.showNotification("حدث خطأ أثناء عملية الحذف.", "error");
+    }
 }
