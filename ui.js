@@ -1,4 +1,4 @@
-// ui.js - الكود الكامل والنهائي
+// ui.js - الكود الكامل والنهائي والمدمج
 
 import { listenToAuditLogs } from './auditLog.js';
 let serviceTypeChart, salesTrendChart;
@@ -15,48 +15,85 @@ export function setCurrentLanguage(lang) {
 
 export function initializeCharts() {
   Chart.defaults.font.family = "'Cairo', sans-serif";
-  const serviceTypeCtx = document.getElementById("serviceTypeChart").getContext("2d");
-  serviceTypeChart = new Chart(serviceTypeCtx, { type: "pie", data: { labels: [], datasets: [{ data: [], backgroundColor: ["#4A90E2", "#7ED321", "#F5A623", "#9013FE", "#BD10E0", "#4A4A4A"] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } } });
+  const serviceTypeCtx = document.getElementById("serviceTypeChart")?.getContext("2d");
+  if (serviceTypeCtx) {
+    serviceTypeChart = new Chart(serviceTypeCtx, { type: "pie", data: { labels: [], datasets: [{ data: [], backgroundColor: ["#4A90E2", "#7ED321", "#F5A623", "#9013FE", "#BD10E0", "#4A4A4A"] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } } });
+  }
   
-  const salesTrendCtx = document.getElementById("salesTrendChart").getContext("2d");
-  salesTrendChart = new Chart(salesTrendCtx, { type: "line", data: { labels: [], datasets: [{ label: "Revenue", data: [], borderColor: "#4A90E2", tension: 0.1 }, { label: "Profit", data: [], borderColor: "#7ED321", tension: 0.1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
+  const salesTrendCtx = document.getElementById("salesTrendChart")?.getContext("2d");
+  if(salesTrendCtx) {
+    salesTrendChart = new Chart(salesTrendCtx, { type: "line", data: { labels: [], datasets: [{ label: "Revenue", data: [], borderColor: "#4A90E2", tension: 0.1 }, { label: "Profit", data: [], borderColor: "#7ED321", tension: 0.1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
+  }
+}
+// --- Loyalty Helpers (UI) ---
+function composeLoyaltyMessage(points) {
+  const pts = Number(points || 0);
+  const ptsText = pts.toLocaleString('ar-EG');
+  const lines = [
+    "أهلًا بك عميلنا المميز! ✨",
+    "",
+    `يسعدنا إعلامك بأن رصيدك الحالي في برنامج الولاء هو ${ptsText} نقطة. 🥳`,
+    "",
+    "يمكنك استبدالها نقدًا أو بأي من منتجاتنا! شكرًا لثقتك في متجر عبقر."
+  ];
+  return lines.join("\n");
 }
 
+// تحويل رقم واتساب لصيغة دولية مصر (+20)
+function toEgyptIntl(whats) {
+  if (!whats) return null;
+  let n = String(whats).replace(/\D+/g, "");
+  if (n.startsWith("20")) return n;           // 20xxxxxxxxxx
+  if (n.startsWith("0"))  return "20" + n.slice(1); // 0xxxxxxxxx -> 20xxxxxxxxx
+  if (n.length === 10 || n.length === 11) return "20" + n;
+  return n;
+}
+
+function buildWhatsAppLink(msisdn, message) {
+  const intl = toEgyptIntl(msisdn);
+  if (!intl) return null;
+  const text = encodeURIComponent(message);
+  return `https://wa.me/${intl}?text=${text}`;
+}
+
+
 export function updateCharts(salesData) {
-  if (!serviceTypeChart || !salesTrendChart || !salesData) return;
+  if (!salesData) return;
   const isDarkMode = document.body.classList.contains("dark-mode");
   const textColor = isDarkMode ? "#f3f4f6" : "#374151";
 
-  const serviceCounts = salesData.reduce((acc, sale) => { acc[sale.serviceType] = (acc[sale.serviceType] || 0) + sale.price; return acc; }, {});
-  serviceTypeChart.data.labels = Object.keys(serviceCounts);
-  serviceTypeChart.data.datasets[0].data = Object.values(serviceCounts);
-  serviceTypeChart.options.plugins.legend.labels.color = textColor;
-  serviceTypeChart.update();
+  if (serviceTypeChart) {
+    const serviceCounts = salesData.reduce((acc, sale) => { acc[sale.serviceType] = (acc[sale.serviceType] || 0) + sale.price; return acc; }, {});
+    serviceTypeChart.data.labels = Object.keys(serviceCounts);
+    serviceTypeChart.data.datasets[0].data = Object.values(serviceCounts);
+    serviceTypeChart.options.plugins.legend.labels.color = textColor;
+    serviceTypeChart.update();
+  }
 
-  const monthlyData = {};
-  salesData.forEach((sale) => {
-    const month = sale.date.substring(0, 7);
-    if (!monthlyData[month]) { monthlyData[month] = { revenue: 0, profit: 0 }; }
-    monthlyData[month].revenue += sale.price;
-    monthlyData[month].profit += sale.profit;
-  });
-  const sortedMonths = Object.keys(monthlyData).sort();
-  salesTrendChart.data.labels = sortedMonths.map(m => {
-      const [year, month] = m.split('-');
-      return new Date(year, month-1).toLocaleString(currentLanguage === 'ar' ? 'ar-EG' : 'en-US', {month: 'short', year: 'numeric'})
-  });
-  salesTrendChart.data.datasets[0].data = sortedMonths.map((m) => monthlyData[m].revenue);
-  salesTrendChart.data.datasets[0].label = translations[currentLanguage]?.revenue || 'Revenue';
-  salesTrendChart.data.datasets[1].data = sortedMonths.map((m) => monthlyData[m].profit);
-  salesTrendChart.data.datasets[1].label = translations[currentLanguage]?.profit || 'Profit';
-
-  salesTrendChart.options.plugins.legend.labels.color = textColor;
-  salesTrendChart.options.scales.x.ticks.color = textColor;
-  salesTrendChart.options.scales.y.ticks.color = textColor;
-  salesTrendChart.update();
+  if (salesTrendChart) {
+    const monthlyData = {};
+    salesData.forEach((sale) => {
+      const month = sale.date.substring(0, 7);
+      if (!monthlyData[month]) { monthlyData[month] = { revenue: 0, profit: 0 }; }
+      monthlyData[month].revenue += sale.price;
+      monthlyData[month].profit += sale.profit;
+    });
+    const sortedMonths = Object.keys(monthlyData).sort();
+    salesTrendChart.data.labels = sortedMonths.map(m => {
+        const [year, month] = m.split('-');
+        return new Date(year, month-1).toLocaleString(currentLanguage === 'ar' ? 'ar-EG' : 'en-US', {month: 'short', year: 'numeric'})
+    });
+    salesTrendChart.data.datasets[0].data = sortedMonths.map((m) => monthlyData[m].revenue);
+    salesTrendChart.data.datasets[0].label = translations[currentLanguage]?.revenue || 'Revenue';
+    salesTrendChart.data.datasets[1].data = sortedMonths.map((m) => monthlyData[m].profit);
+    salesTrendChart.data.datasets[1].label = translations[currentLanguage]?.profit || 'Profit';
+    salesTrendChart.options.plugins.legend.labels.color = textColor;
+    salesTrendChart.options.scales.x.ticks.color = textColor;
+    salesTrendChart.options.scales.y.ticks.color = textColor;
+    salesTrendChart.update();
+  }
 }
 
-// الدالة الجديدة في ui.js (اسم جديد وبدون استماع)
 export function updateDashboardAuditLog(logs) {
   const list = document.getElementById('audit-log-body');
   if (!list) return;
@@ -91,21 +128,31 @@ function salesRowContent(sale) {
         </td>`;
 }
 
+// ui.js - استبدل الدالة القديمة بهذه النسخة
 function customerRowContent(customer) {
     const isVip = (customer.tags && customer.tags.includes('VIP')) || (customer.totalSpent || 0) > 10000;
     const lastPurchase = new Date(customer.lastPurchase);
     const daysInactive = lastPurchase && !isNaN(lastPurchase) ? (Date.now() - lastPurchase.getTime()) / (1000*60*60*24) : Infinity;
+
     let typeKey = 'type_new';
     let badgeClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-    if (daysInactive > 30) {
+
+    // --- هذا هو الترتيب الصحيح للشروط ---
+    if (customer.tags && customer.tags.includes('مستورد')) {
+        typeKey = 'type_imported';
+        badgeClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+    } else if (daysInactive > 30) {
         typeKey = 'type_inactive';
         badgeClass = 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     } else if ((customer.totalOrders || 0) > 1) {
         typeKey = 'type_returning';
         badgeClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
     }
+    // --- نهاية التعديل ---
+
     const inactiveTooltip = translations[currentLanguage]?.inactive_tooltip || '';
     const warningIcon = daysInactive > 30 ? `<svg class="inline w-4 h-4 text-yellow-500 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" title="${inactiveTooltip}"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.1 0 1.98-.9 1.87-2L18.87 5c-.1-1.1-1-2-2.1-2H7.23c-1.1 0-2 .9-2.1 2L3.1 17c-.1 1.1.77 2 1.97 2z" /></svg>` : '';
+
     return `
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
             ${customer.name} ${isVip ? '<span class="vip-badge" data-translate="vip"></span>' : ''}
@@ -117,15 +164,6 @@ function customerRowContent(customer) {
         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">${customer.totalOrders || 0}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">${formatCurrency(customer.totalSpent)}</td>
         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium actions-cell space-x-2">
-            <button class="copy-phone" data-number="${customer.whatsappNumber}" title="${translations[currentLanguage]?.copy || 'Copy'}">
-                <svg class="w-5 h-5 inline text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16h8M8 12h8m-6 8h6a2 2 0 002-2V6a2 2 0 00-2-2h-6M6 16H5a2 2 0 01-2-2V6a2 2 0 012-2h6"></path></svg>
-            </button>
-            <a href="https://wa.me/${customer.whatsappNumber}" target="_blank" class="open-whatsapp" title="WhatsApp">
-                <svg class="w-5 h-5 inline text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M16 0C7.163 0 0 7.163 0 16c0 2.837.74 5.51 2.029 7.844L0 32l8.363-2.19A15.901 15.901 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0z" fill="currentColor"/><path d="M24.26 22.04c-.37.94-2.16 1.79-2.97 1.91-.76.11-1.74.16-2.81-.17-.65-.21-1.48-.48-2.55-.94-4.49-1.95-7.4-6.52-7.63-6.82-.23-.3-1.82-2.42-1.82-4.62s1.15-3.27 1.56-3.72c.41-.45.9-.56 1.2-.56.3 0 .6 0 .86.02.27.01.65-.11 1.02.78.37.89 1.26 3.07 1.37 3.29.11.23.18.5.04.8-.23.49-.35.8-.7 1.23-.23.28-.48.63-.2 1.2.28.56 1.24 2.05 2.66 3.32 1.83 1.63 3.36 2.14 3.92 2.37.56.23.89.2 1.22-.12.33-.32 1.4-1.64 1.78-2.2.37-.56.74-.47 1.22-.28.49.19 3.09 1.45 3.62 1.72.53.27.88.4 1 .62.23.12 1.34-.25 2.27z" fill="#fff"/></svg>
-            </a>
-            <button class="quick-order" data-name="${customer.name}" data-number="${customer.whatsappNumber}" title="New Order">
-                <svg class="w-5 h-5 inline text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-            </button>
             <button class="details-btn" data-id="${customer.whatsappNumber}" data-translate="details"></button>
         </td>
     `;
@@ -134,40 +172,31 @@ function customerRowContent(customer) {
 function renderPaginationControls(elementId, pagination, onPageChange) {
   const pagDiv = document.getElementById(elementId);
   if (!pagDiv) return;
-
   if (pagination.totalPages <= 1) {
     pagDiv.innerHTML = '';
     return;
   }
-
   const prevText = translations[currentLanguage]?.previous || 'Previous';
   const nextText = translations[currentLanguage]?.next || 'Next';
-  
   pagDiv.innerHTML = `
-    <button id="prevBtn_${elementId}" class="px-3 py-1 bg-gray-200 dark:bg-slate-700 rounded" ${pagination.currentPage === 1 ? 'disabled' : ''}>
-        ${prevText}
-    </button>
+    <button id="prevBtn_${elementId}" class="px-3 py-1 bg-gray-200 dark:bg-slate-700 rounded" ${pagination.currentPage === 1 ? 'disabled' : ''}>${prevText}</button>
     <span class="dark:text-white">${pagination.currentPage} / ${pagination.totalPages}</span>
-    <button id="nextBtn_${elementId}" class="px-3 py-1 bg-gray-200 dark:bg-slate-700 rounded" ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}>
-        ${nextText}
-    </button>
+    <button id="nextBtn_${elementId}" class="px-3 py-1 bg-gray-200 dark:bg-slate-700 rounded" ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}>${nextText}</button>
   `;
-
   document.getElementById(`prevBtn_${elementId}`).onclick = () => onPageChange(pagination.currentPage - 1);
   document.getElementById(`nextBtn_${elementId}`).onclick = () => onPageChange(pagination.currentPage + 1);
 }
 
 export function renderSalesLog(dataToRender, editSaleCallback, deleteSaleCallback, pagination, onPageChange) {
   const tableBody = document.getElementById("salesTableBody");
+  if (!tableBody) return;
   tableBody.innerHTML = ""; 
-
   if (!dataToRender || dataToRender.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center" data-translate="no_sales_records_found"></td></tr>`;
     document.getElementById('salesPagination').innerHTML = '';
     setLanguage(currentLanguage);
     return;
   }
-
   dataToRender.forEach(sale => {
       const row = tableBody.insertRow();
       row.className = "hover:bg-gray-50 dark:hover:bg-slate-700";
@@ -176,64 +205,53 @@ export function renderSalesLog(dataToRender, editSaleCallback, deleteSaleCallbac
       row.querySelector(".delete-btn").onclick = () => deleteSaleCallback(sale.id);
       row.querySelector(".edit-btn").onclick = () => editSaleCallback(sale.id);
   });
-
   renderPaginationControls('salesPagination', pagination, onPageChange);
   setLanguage(currentLanguage);
 }
 
 export function renderCustomerDatabase(customersArray, showCustomerDetailsCallback, pagination, onPageChange, quickOrderCallback) {
   const tableBody = document.getElementById("customersTableBody");
+  if(!tableBody) return;
   tableBody.innerHTML = "";
-
   if (!customersArray || customersArray.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center" data-translate="no_customer_records_found"></td></tr>`;
     document.getElementById('customersPagination').innerHTML = '';
     setLanguage(currentLanguage);
     return;
   }
-
   customersArray.forEach(customer => {
       const row = tableBody.insertRow();
       row.className = "hover:bg-gray-50 dark:hover:bg-slate-700";
       row.dataset.id = customer.whatsappNumber || customer.id;
       row.innerHTML = customerRowContent(customer);
-
       row.querySelector(".details-btn").onclick = () => showCustomerDetailsCallback(customer.whatsappNumber);
-      row.querySelector('.copy-phone').onclick = () => { navigator.clipboard.writeText(customer.whatsappNumber); showNotification(translations[currentLanguage]?.copied || 'Copied!', 'success'); };
-      row.querySelector('.quick-order').onclick = () => quickOrderCallback(customer.name, customer.whatsappNumber);
   });
-
   renderPaginationControls('customersPagination', pagination, onPageChange);
   setLanguage(currentLanguage);
 }
 
 export function renderDebtManagement(salesData, markAsPaidCallback) {
   const tableBody = document.getElementById("debtTableBody");
+  if (!tableBody) return;
   tableBody.innerHTML = ""; 
   const unpaidOrders = salesData.filter((sale) => sale.paymentStatus === "unpaid");
-
   if (unpaidOrders.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center" data-translate="no_unpaid_orders"></td></tr>`;
     setLanguage(currentLanguage);
     return;
   }
-
   unpaidOrders.forEach((sale) => {
     const row = tableBody.insertRow();
     row.className = "hover:bg-gray-50 dark:hover:bg-slate-700";
-    
     const cellDate = row.insertCell();
     cellDate.className = "px-6 py-4 whitespace-nowrap text-sm font-medium";
     cellDate.textContent = formatDate(sale.date);
-    
     const cellClient = row.insertCell();
     cellClient.className = "px-6 py-4 whitespace-nowrap text-sm";
     cellClient.textContent = sale.clientName;
-
     const cellAmount = row.insertCell();
     cellAmount.className = "px-6 py-4 whitespace-nowrap text-sm text-red-500 font-semibold";
     cellAmount.textContent = formatCurrency(sale.price);
-
     const cellActions = row.insertCell();
     cellActions.className = "px-6 py-4 whitespace-nowrap text-right text-sm font-medium actions-cell";
     const button = document.createElement('button');
@@ -243,18 +261,19 @@ export function renderDebtManagement(salesData, markAsPaidCallback) {
     button.onclick = () => markAsPaidCallback(sale.id);
     cellActions.appendChild(button);
   });
-  
   setLanguage(currentLanguage);
 }
 
 export function updateKpiCards(salesData, customersData) {
     const now = new Date();
     const thisMonthStr = now.toISOString().substring(0, 7);
-    
     const thisMonthSales = salesData.filter(s => s.date.substring(0, 7) === thisMonthStr);
 
-    const monthlyRevenue = thisMonthSales.reduce((sum, s) => sum + s.price, 0);
-    document.getElementById("monthlyRevenue").textContent = monthlyRevenue.toFixed(2);
+    const monthlyRevenueEl = document.getElementById("monthlyRevenue");
+    if (monthlyRevenueEl) {
+        const monthlyRevenue = thisMonthSales.reduce((sum, s) => sum + s.price, 0);
+        monthlyRevenueEl.textContent = monthlyRevenue.toFixed(2);
+    }
 
     const totalRevenue = salesData.reduce((sum, s) => sum + s.price, 0);
     const totalProfit = salesData.reduce((sum, s) => sum + s.profit, 0);
@@ -301,7 +320,9 @@ export function updateKpiCards(salesData, customersData) {
     if (inactEl) inactEl.textContent = inactiveCount;
 
     const inactListEl = document.getElementById('inactiveClientsList');
-    if (inactListEl) inactListEl.innerHTML = inactiveList.slice(0,3).map(c=>`<li>${c.name}</li>`).join('');
+    if (inactListEl) {
+        inactListEl.innerHTML = inactiveList.slice(0,3).map(c=>`<li>${c.name}</li>`).join('');
+    }
 
     const monthSalesByCustomer = {};
     thisMonthSales.forEach(sale => {
@@ -329,6 +350,7 @@ export function renderActivityFeed(salesData) {
 
     if (recentSales.length === 0) {
         feedContainer.innerHTML = `<p class="text-gray-500 dark:text-slate-400" data-translate="no_recent_activity"></p>`;
+        setLanguage(currentLanguage);
         return;
     }
 
@@ -389,16 +411,21 @@ export function updateDashboardUI(salesData, dailyGoal) {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
     
-    document.getElementById("dashboardTotalOrders").textContent = salesData.length;
+    const dashboardTotalOrdersEl = document.getElementById("dashboardTotalOrders");
+    if(dashboardTotalOrdersEl) dashboardTotalOrdersEl.textContent = salesData.length;
+
     const serviceCounts = salesData.reduce((acc, sale) => { acc[sale.serviceType] = (acc[sale.serviceType] || 0) + 1; return acc; }, {});
     const topService = Object.keys(serviceCounts).reduce((a, b) => serviceCounts[a] > serviceCounts[b] ? a : b, "N/A");
     const topServiceEl = document.getElementById("dashboardTopService");
-    topServiceEl.textContent = topService;
-    topServiceEl.title = topService;
+    if(topServiceEl) {
+        topServiceEl.textContent = topService;
+        topServiceEl.title = topService;
+    }
     
     updateProfitByDateUI(todayStr, salesData);
     const totalDebt = salesData.filter(s => s.paymentStatus === "unpaid").reduce((sum, s) => sum + s.price, 0);
-    document.getElementById("totalDebt").textContent = totalDebt.toFixed(2);
+    const totalDebtEl = document.getElementById("totalDebt");
+    if(totalDebtEl) totalDebtEl.textContent = totalDebt.toFixed(2);
 
     const todaySales = salesData.filter(s => s.date === todayStr);
     const todayProfit = todaySales.reduce((sum, s) => sum + s.profit, 0);
@@ -423,39 +450,36 @@ export function updateProfitByDateUI(dateStr, salesData) {
     if (!dateStr) return;
     const salesForDate = salesData.filter(s => s.date === dateStr);
     const profitForDate = salesForDate.reduce((sum, s) => sum + s.profit, 0);
-    document.getElementById("dateProfitValue").textContent = profitForDate.toFixed(2);
+    const el = document.getElementById("dateProfitValue");
+    if(el) el.textContent = profitForDate.toFixed(2);
 }
 
 export function renderServiceProfitability(salesData) {
     const body = document.getElementById("serviceProfitabilityBody");
+    if(!body) return;
     body.innerHTML = "";
     const serviceStats = {};
     salesData.forEach((sale) => {
-        if (!serviceStats[sale.serviceType]) {
-            serviceStats[sale.serviceType] = { orders: 0, revenue: 0, profit: 0 };
-        }
+        if (!serviceStats[sale.serviceType]) serviceStats[sale.serviceType] = { orders: 0, revenue: 0, profit: 0 };
         serviceStats[sale.serviceType].orders++;
         serviceStats[sale.serviceType].revenue += sale.price;
         serviceStats[sale.serviceType].profit += sale.profit;
     });
-
     if (Object.keys(serviceStats).length === 0) {
         body.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center" data-translate="no_data_available"></td></tr>`;
     } else {
-        Object.entries(serviceStats)
-            .sort(([, a], [, b]) => b.revenue - a.revenue)
-            .forEach(([service, stats]) => {
-                const avgProfit = stats.orders > 0 ? stats.profit / stats.orders : 0;
-                const row = document.createElement("tr");
-                row.className = "hover:bg-gray-50 dark:hover:bg-slate-700";
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${service}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">${stats.orders}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">${formatCurrency(stats.revenue)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm ${avgProfit >= 0 ? "text-green-500" : "text-red-500"}">${formatCurrency(avgProfit)}</td>
-                `;
-                body.appendChild(row);
-            });
+        Object.entries(serviceStats).sort(([, a], [, b]) => b.revenue - a.revenue).forEach(([service, stats]) => {
+            const avgProfit = stats.orders > 0 ? stats.profit / stats.orders : 0;
+            const row = document.createElement("tr");
+            row.className = "hover:bg-gray-50 dark:hover:bg-slate-700";
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${service}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">${stats.orders}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">${formatCurrency(stats.revenue)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm ${avgProfit >= 0 ? "text-green-500" : "text-red-500"}">${formatCurrency(avgProfit)}</td>
+            `;
+            body.appendChild(row);
+        });
     }
     setLanguage(currentLanguage);
 }
@@ -464,20 +488,17 @@ export function showDeleteConfirmationUI(confirmDeleteCallback) {
     const dialog = document.getElementById("deleteConfirmationModal");
     dialog.classList.remove("hidden");
     const confirmBtn = document.getElementById("confirmDeleteBtn");
-    
     const newConfirmBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-    newConfirmBtn.addEventListener("click", confirmDeleteCallback, { once: true });
-    
-    newConfirmBtn.setAttribute('data-translate', 'delete');
+    newConfirmBtn.addEventListener("click", () => {
+        confirmDeleteCallback();
+        hideDeleteConfirmationUI();
+    }, { once: true });
     setLanguage(currentLanguage); 
 }
 
 export function hideDeleteConfirmationUI() {
     document.getElementById("deleteConfirmationModal").classList.add("hidden");
-    const confirmBtn = document.getElementById("confirmDeleteBtn");
-    const newConfirmBtn = confirmBtn.cloneNode(true);
-    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
 }
 
 export function fillSaleForm(sale) {
@@ -490,7 +511,6 @@ export function fillSaleForm(sale) {
   document.getElementById("whatsappNumber").value = sale.whatsappNumber;
   document.getElementById("paymentStatus").value = sale.paymentStatus;
   document.getElementById("notes").value = sale.notes;
-
   document.querySelector('[data-tab="sales-entry"]').click();
   window.scrollTo(0,0);
 }
@@ -501,56 +521,56 @@ export function resetSaleForm() {
   document.getElementById("date").valueAsDate = new Date();
 }
 
-export function showNotification(message, type = "success") {
+export function showNotification(message, type = "info", duration = 3000) {
   const notification = document.getElementById("notification");
   const notificationMessage = document.getElementById("notificationMessage");
   notificationMessage.textContent = message;
-  notification.classList.remove("bg-green-100", "text-green-800", "bg-red-100", "text-red-800", "dark:bg-green-900", "dark:text-green-200", "dark:bg-red-900", "dark:text-red-200");
-  const color = type === "error" ? "red" : "green";
-  notification.classList.add(`bg-${color}-100`, `text-${color}-800`, `dark:bg-${color}-900`, `dark:text-${color}-200`);
+  const colors = {success: 'green', error: 'red', info: 'blue'};
+  const color = colors[type] || 'blue';
+  notification.className = `fixed top-4 left-4 w-80 rounded-lg shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out z-50 bg-${color}-100 text-${color}-800 dark:bg-${color}-900 dark:text-${color}-200`;
   notification.classList.remove("-translate-x-full");
-  setTimeout(() => { notification.classList.add("-translate-x-full"); }, 3000);
+  setTimeout(() => { notification.classList.add("-translate-x-full"); }, duration);
 }
 
 export function hideLoadingOverlay() {
     const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) {
-        loadingOverlay.classList.add('hidden');
-        document.body.classList.remove('loading');
-    }
+    if (loadingOverlay) loadingOverlay.classList.add('hidden');
+    document.body.classList.remove('loading');
 }
+
 export function handleLoadingErrorUI(error) {
     const loadingMessage = document.getElementById('loadingMessage');
     const loadingError = document.getElementById('loadingError');
     console.error("Firebase Initialization Error:", error);
     const errorText = translations[currentLanguage]?.firebase_error || "Connection to database failed.";
-    loadingMessage.classList.add('hidden');
-    loadingError.textContent = errorText;
-    loadingError.classList.remove('hidden');
+    if (loadingMessage) loadingMessage.classList.add('hidden');
+    if (loadingError) {
+        loadingError.textContent = errorText;
+        loadingError.classList.remove('hidden');
+    }
 }
 
 export function setLanguage(lang) {
   currentLanguage = lang;
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-
   document.querySelectorAll("[data-translate]").forEach((el) => {
     const key = el.dataset.translate;
     if (translations[lang]?.[key]) {
       el.textContent = translations[lang][key];
     }
   });
-
   document.querySelectorAll(".currency-symbol").forEach((el) => {
     el.textContent = translations[lang].currency;
   });
-
   const placeHolderMapping = {
     'profitGoalInput': 'profit_goal_placeholder',
     'inactiveCustomersList': 'inactive_customers_placeholder',
     'customerSearch': 'search',
+    'newTagInput': 'new_tag_placeholder',
+    'newNoteInput': 'new_note_placeholder',
+    'newReminderText': 'new_reminder_placeholder'
   }
-  
   for (const [id, key] of Object.entries(placeHolderMapping)) {
       const element = document.getElementById(id);
       if (element && translations[lang]?.[key]) {
@@ -560,7 +580,7 @@ export function setLanguage(lang) {
 }
 
 export function formatCurrency(value) {
-  const currencySymbol = translations[currentLanguage]?.currency || 'EGP';
+  const currencySymbol = translations[currentLanguage]?.currency || '';
   return `${(value || 0).toFixed(2)} ${currencySymbol}`;
 }
 
@@ -571,6 +591,7 @@ export function formatDate(dateString) {
   return new Date(date.getTime() + date.getTimezoneOffset() * 60000).toLocaleDateString(currentLanguage === "ar" ? "ar-EG" : "en-US", options);
 }
 
+// ui.js - استبدل الدالة القديمة بهذه
 export function showCustomerDetailsUI(customer, history, totalProfit, avgProfit, reminders, addTagCallback, removeTagCallback, addNoteCallback, addReminderCallback, removeReminderCallback) {
     document.getElementById("modalCustomerName").textContent = customer.name;
     document.getElementById("modalCustomerWhatsapp").textContent = customer.whatsappNumber;
@@ -578,6 +599,61 @@ export function showCustomerDetailsUI(customer, history, totalProfit, avgProfit,
     document.getElementById("modalCustomerTotalSpent").textContent = formatCurrency(history.reduce((s, h) => s + h.price, 0));
     document.getElementById("modalCustomerTotalProfit").textContent = formatCurrency(totalProfit);
     document.getElementById("modalCustomerAvgProfit").textContent = formatCurrency(avgProfit);
+    // --- عرض نقاط الولاء في المودال ---
+const ptsEl = document.getElementById("modalCustomerLoyaltyPoints");
+if (ptsEl) {
+  const pts = Number(customer?.loyaltyPoints || 0);
+  ptsEl.textContent = pts.toLocaleString('ar-EG');
+}
+
+// --- ربط زر إرسال النقاط على واتساب ---
+const sendBtn = document.getElementById("sendPointsBtn");
+if (sendBtn) {
+  // لو الدالة بتتنده أكتر من مرة، امسح أي Listeners قديمة
+  const freshBtn = sendBtn.cloneNode(true);
+  sendBtn.replaceWith(freshBtn);
+
+  if (!customer?.whatsappNumber) {
+    freshBtn.disabled = true;
+    freshBtn.classList.add("opacity-50", "cursor-not-allowed");
+    freshBtn.title = "لا يوجد رقم واتساب لهذا العميل";
+  } else {
+    freshBtn.disabled = false;
+    freshBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    freshBtn.title = "إرسال رصيد النقاط عبر واتساب";
+    freshBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const msg = composeLoyaltyMessage(customer?.loyaltyPoints || 0);
+      const link = buildWhatsAppLink(customer?.whatsappNumber, msg);
+      if (link) window.open(link, "_blank");
+      // --- زر نسخ الرسالة ---
+const copyBtn = document.getElementById("copyPointsBtn");
+if (copyBtn) {
+  const freshCopyBtn = copyBtn.cloneNode(true);
+  copyBtn.replaceWith(freshCopyBtn);
+
+  if (!customer?.loyaltyPoints && customer?.loyaltyPoints !== 0) {
+    freshCopyBtn.disabled = true;
+    freshCopyBtn.classList.add("opacity-50", "cursor-not-allowed");
+    freshCopyBtn.title = "لا توجد نقاط لنسخها";
+  } else {
+    freshCopyBtn.disabled = false;
+    freshCopyBtn.classList.remove("opacity-50", "cursor-not-allowed");
+    freshCopyBtn.title = "نسخ رصيد النقاط";
+    freshCopyBtn.addEventListener("click", () => {
+      const msg = composeLoyaltyMessage(customer?.loyaltyPoints || 0);
+      navigator.clipboard.writeText(msg).then(() => {
+        alert("تم نسخ الرسالة إلى الحافظة ✅");
+      }).catch(() => {
+        alert("حدث خطأ أثناء النسخ ❌");
+      });
+    });
+  }
+}
+
+    });
+  }
+}
 
     const historyBody = document.getElementById("modalPurchaseHistory");
     historyBody.innerHTML = "";
@@ -588,23 +664,35 @@ export function showCustomerDetailsUI(customer, history, totalProfit, avgProfit,
             row.innerHTML = `<td class="px-4 py-2 text-sm">${formatDate(sale.date)}</td><td class="px-4 py-2 text-sm">${sale.serviceType}</td><td class="px-4 py-2 text-sm">${formatCurrency(sale.price)}</td>`;
         });
     }
-
+    
+    // --- Tagging Logic ---
     renderCustomerTagsUI(customer, removeTagCallback);
     const addTagBtn = document.getElementById("addTagBtn");
     const newTagInput = document.getElementById("newTagInput");
-    addTagBtn.onclick = () => { addTagCallback(customer.whatsappNumber, newTagInput.value.trim()); newTagInput.value = ''; };
-
+    // This makes sure we don't add multiple listeners to the same button
+    const newAddTagBtn = addTagBtn.cloneNode(true);
+    addTagBtn.parentNode.replaceChild(newAddTagBtn, addTagBtn);
+    newAddTagBtn.onclick = () => { 
+        addTagCallback(customer.whatsappNumber, newTagInput.value.trim()); 
+        newTagInput.value = ''; // Clear input after adding
+    };
+    // --- End of Tagging Logic ---
+    
     renderCustomerNotesUI(customer);
     const addNoteBtn = document.getElementById("addNoteBtn");
     const newNoteInput = document.getElementById("newNoteInput");
-    addNoteBtn.onclick = () => { addNoteCallback(customer.whatsappNumber, newNoteInput.value.trim()); newNoteInput.value = ''; };
-
+    const newAddNoteBtn = addNoteBtn.cloneNode(true);
+    addNoteBtn.parentNode.replaceChild(newAddNoteBtn, addNoteBtn);
+    newAddNoteBtn.onclick = () => { addNoteCallback(customer.whatsappNumber, newNoteInput.value.trim()); };
+    
     renderCustomerRemindersUI(reminders, customer.whatsappNumber, removeReminderCallback);
     const addReminderBtn = document.getElementById("addReminderBtn");
     const newReminderDate = document.getElementById("newReminderDate");
     const newReminderText = document.getElementById("newReminderText");
-    addReminderBtn.onclick = () => { addReminderCallback(customer.whatsappNumber, newReminderDate.value, newReminderText.value.trim()); newReminderText.value = ''; };
-
+    const newAddReminderBtn = addReminderBtn.cloneNode(true);
+    addReminderBtn.parentNode.replaceChild(newAddReminderBtn, addReminderBtn);
+    newAddReminderBtn.onclick = () => { addReminderCallback(customer.whatsappNumber, newReminderDate.value, newReminderText.value.trim()); };
+    
     document.getElementById("customerDetailsModal").classList.remove("hidden");
     setLanguage(currentLanguage);
 }
@@ -613,28 +701,37 @@ export function hideCustomerDetailsUI() {
     document.getElementById("customerDetailsModal").classList.add("hidden");
 }
 
+// ui.js - استبدل الدالة القديمة بهذه
 export function renderCustomerTagsUI(customer, removeTagCallback) {
     const tagsContainer = document.getElementById("modalCustomerTags");
-    tagsContainer.innerHTML = "";
+    if (!tagsContainer) return;
+    
+    tagsContainer.innerHTML = ""; // Clear previous tags
+    
     if (customer.tags && customer.tags.length > 0) {
         customer.tags.forEach(tag => {
             const badge = document.createElement("span");
             badge.className = "inline-flex items-center px-2 py-1 mr-2 text-sm font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300";
-            badge.textContent = tag;
+            
+            const tagText = document.createTextNode(tag);
+            
             const removeBtn = document.createElement("button");
-            removeBtn.className = "ml-2 text-red-500 hover:text-red-700";
+            removeBtn.className = "ml-2 mr-1 text-blue-500 hover:text-blue-700 dark:text-blue-300 dark:hover:text-blue-100 font-bold";
             removeBtn.innerHTML = "&times;";
             removeBtn.onclick = () => removeTagCallback(customer.whatsappNumber, tag);
+            
+            badge.appendChild(tagText);
             badge.appendChild(removeBtn);
-tagsContainer.appendChild(badge);
+            tagsContainer.appendChild(badge);
         });
     } else {
-        tagsContainer.textContent = "No tags yet.";
+        // You can add a placeholder if you want, e.g.:
+        // tagsContainer.textContent = "No tags yet.";
     }
 }
-
 export function renderCustomerNotesUI(customer) {
     const notesContainer = document.getElementById("modalNotesTimeline");
+    if (!notesContainer) return;
     notesContainer.innerHTML = "";
     if (customer.notes && customer.notes.length > 0) {
         customer.notes.sort((a,b) => b.timestamp - a.timestamp).forEach(note => {
@@ -643,13 +740,12 @@ export function renderCustomerNotesUI(customer) {
             noteEl.innerHTML = `<p class="text-sm">${note.text}</p><p class="text-xs text-gray-500 dark:text-slate-400 mt-1">${new Date(note.timestamp).toLocaleString()}</p>`;
             notesContainer.appendChild(noteEl);
         });
-    } else {
-        notesContainer.textContent = "No notes yet.";
     }
 }
 
 export function renderCustomerRemindersUI(reminders, whatsapp, removeReminderCallback) {
     const container = document.getElementById('modalReminders');
+    if(!container) return;
     container.innerHTML = '';
     if (reminders && reminders.length > 0) {
         reminders.forEach((rem, index) => {
@@ -659,13 +755,12 @@ export function renderCustomerRemindersUI(reminders, whatsapp, removeReminderCal
             el.querySelector('button').onclick = () => removeReminderCallback(whatsapp, index);
             container.appendChild(el);
         });
-    } else {
-        container.textContent = 'No reminders yet.';
     }
 }
 
 export function updatePLReportResult(period, income, expenses, net) {
     const resultDiv = document.getElementById('plReportResult');
+    if(!resultDiv) return;
     const trans = translations[currentLanguage];
     resultDiv.innerHTML = `
         <h4 class="font-bold mb-2">${period.charAt(0).toUpperCase() + period.slice(1)} Report</h4>
@@ -683,19 +778,19 @@ export function updatePLReportResult(period, income, expenses, net) {
 
 export function updateInactiveCustomersList(inactiveCustomers) {
     const listArea = document.getElementById('inactiveCustomersList');
-    listArea.value = inactiveCustomers.map(c => c.whatsappNumber).join('\n');
+    if(listArea) listArea.value = inactiveCustomers.map(c => c.whatsappNumber).join('\n');
     setLanguage(currentLanguage);
 }
 
 export function updateGoalSimulatorResult(goal, serviceStats) {
     const resultDiv = document.getElementById('goalSimulatorResult');
+    if(!resultDiv) return;
     const trans = translations[currentLanguage];
     if (!goal) {
         resultDiv.innerHTML = `<p class="text-red-500">${trans.profit_goal_placeholder}</p>`;
         setLanguage(currentLanguage);
         return;
     }
-
     let resultHTML = `<p class="mb-2">${trans.goal_sim_intro_1} <strong>${formatCurrency(goal)}</strong>, ${trans.goal_sim_intro_2}</p><ul class="list-disc list-inside">`;
     for (const service in serviceStats) {
         const avgProfit = serviceStats[service].profit / serviceStats[service].count;
@@ -711,12 +806,12 @@ export function updateGoalSimulatorResult(goal, serviceStats) {
 
 export function updateBasketAnalysisResult(sortedPairs) {
     const resultDiv = document.getElementById('basketAnalysisResult');
+    if(!resultDiv) return;
     if(sortedPairs.length === 0) {
         resultDiv.innerHTML = `<p>Not enough data for analysis.</p>`;
         setLanguage(currentLanguage);
         return;
     }
-
     let resultHTML = `<p class="mb-2"><strong>Frequently Bought Together:</strong></p><ul class="list-disc list-inside">`;
     sortedPairs.slice(0, 3).forEach(pair => {
         resultHTML += `<li>${pair[0]} (${pair[1]} times)</li>`;
@@ -724,4 +819,67 @@ export function updateBasketAnalysisResult(sortedPairs) {
     resultHTML += `</ul>`;
     resultDiv.innerHTML = resultHTML;
     setLanguage(currentLanguage);
+}
+
+export function renderClientNameSuggestions(suggestions, onSelectCallback) {
+    const container = document.getElementById('clientNameSuggestions');
+    if (!container) return;
+    container.innerHTML = '';
+    if (suggestions.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    suggestions.forEach(customer => {
+        const item = document.createElement('div');
+        item.className = 'suggestion-item border-b dark:border-slate-500';
+        item.textContent = `${customer.name} (${customer.whatsappNumber})`;
+        item.onmousedown = () => {
+            onSelectCallback(customer);
+        };
+        container.appendChild(item);
+    });
+    container.classList.remove('hidden');
+}
+
+export function hideClientNameSuggestions() {
+    const container = document.getElementById('clientNameSuggestions');
+    if (container) {
+        container.classList.add('hidden');
+    }
+}
+export function populateTagFilterDropdown(tags) {
+    const select = document.getElementById('tagFilterSelect');
+    if (!select) return;
+
+    // نحتفظ بالخيار الأول ("اختر علامة...") ونمسح الباقي
+    const firstOption = select.options[0];
+    select.innerHTML = '';
+    select.appendChild(firstOption);
+
+    // نضيف العلامات الجديدة
+    tags.forEach(tag => {
+        const option = document.createElement('option');
+        option.value = tag;
+        option.textContent = tag;
+        select.appendChild(option);
+    });
+}
+export function displayFilteredNumbers(numbers) {
+    const textarea = document.getElementById('filteredNumbersTextarea');
+    if (!textarea) return;
+    textarea.value = numbers.join('\n');
+}
+// ui.js - أضف هذه الدالة في نهاية الملف
+export function toggleActivityPanel(show) {
+    const panel = document.getElementById('activityPanel');
+    const overlay = document.getElementById('activityOverlay');
+    if (!panel || !overlay) return;
+
+    if (show) {
+        panel.classList.remove('translate-x-full');
+        overlay.classList.remove('hidden');
+    } else {
+        panel.classList.add('translate-x-full');
+        overlay.classList.add('hidden');
+    }
 }

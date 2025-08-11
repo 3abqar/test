@@ -1,6 +1,7 @@
 // main.js - الكود الكامل والنهائي
 
-import { db, auth, salesCollection, customersCollection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, getDoc, setDoc, query, where, getDocs, writeBatch, onAuthStateChanged, signInAnonymously } from './firebase.js';import * as UI from './ui.js';
+import { db, auth, salesCollection, customersCollection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, getDoc, setDoc, query, where, getDocs, writeBatch, onAuthStateChanged, signInAnonymously } from './firebase.js';
+import * as UI from './ui.js';
 import { addAuditLog, listenToAuditLogs } from './auditLog.js';
 
 // --- Global Variables ---
@@ -18,7 +19,6 @@ let recentActivities = [];
 let notifications = [];
 
 // --- TRANSLATION DATA ---
-// main.js - استبدل كائن الترجمة القديم بهذا الكائن الكامل
 const translations = {
   en: {
     app_title: "Abqar Store Sales",
@@ -65,20 +65,13 @@ const translations = {
     new_vs_returning: "New vs Returning",
     inactive_clients: "Inactive Clients",
     top_client_month: "Top Client This Month",
-    type_returning: "Returning",
-    type_new: "New",
-    type_inactive: "Inactive",
+    type_returning: "Returning", type_new: "New", type_inactive: "Inactive", type_imported: "Imported",
     inactive_tooltip: "Customer inactive – consider follow-up.",
     search: "Search",
     total_profit: "Total Profit",
     avg_profit_order: "Avg Profit/Order",
-    next: "Next",
-    previous: "Previous",
-    reminders: "Reminders",
-    audit_log: "Audit Log",
-    pdf_reports: "PDF Reports",
-    sales_pdf: "Sales PDF",
-    customers_pdf: "Customers PDF",
+    next: "Next", previous: "Previous", reminders: "Reminders", audit_log: "Audit Log",
+    pdf_reports: "PDF Reports", sales_pdf: "Sales PDF", customers_pdf: "Customers PDF",
     most_profitable_client: "Most Profitable Client",
     vip: "VIP",
     alert_inactive: "Inactive clients: {count}",
@@ -89,11 +82,13 @@ const translations = {
     basket_analysis: "Basket Analysis", analyze: "Analyze",
     loading_data: "Loading Data...",
     firebase_error: "Connection to database failed. Please check your Firebase configuration and internet connection.",
-    // -- الترجمات الجديدة --
     customer_data_management: "Customer Data Management",
     import_helper_text: "Export your contacts from Google as a Google CSV, then upload the file here.",
-    import: "Import",
-    delete_imported: "Delete Imported",
+    import: "Import", delete_imported: "Delete Imported",
+    targeted_marketing_tool: "Targeted Marketing Tool",
+    select_a_tag: "Select a tag to filter...",
+    copy_numbers: "Copy Numbers",
+    loyalty_points: "Loyalty Points",
   },
   ar: {
     app_title: "مبيعات متجر عبقر",
@@ -126,7 +121,7 @@ const translations = {
     unpaid_orders: "الطلبات غير المدفوعة", amount_due: "المبلغ المستحق", no_unpaid_orders: "لا توجد طلبات غير مدفوعة",
     notification: "إشعار",
     delete_sale_title: "حذف عملية البيع", delete_sale_message: "هل أنت متأكد أنك تريد حذف هذا البيع؟ لا يمكن التراجع عن هذا الإجراء.",
-    currency: "ج.م", edit: "تعديل", delete: "حذف", details: "تفاصيل", mark_as_paid: "تحديد كمدفوع", filter: "تصفية",
+    currency: "ج.م", edit: "تعديل", delete: "حذف", details: "تفاصيل", mark_as_paid: "تحديد كمدفوع", filter: "فلترة",
     enter_daily_goal: "أدخل الهدف اليومي الجديد", goal_updated: "تم تحديث الهدف اليومي بنجاح!",
     customer_details: "تفاصيل العميل", purchase_history: "سجل الشراء", close: "إغلاق",
     customer_name: "الاسم", confirm: "تأكيد", cancel: "إلغاء",
@@ -140,20 +135,13 @@ const translations = {
     new_vs_returning: "جدد مقابل عائدين",
     inactive_clients: "العملاء غير النشطين",
     top_client_month: "أعلى عميل هذا الشهر",
-    type_returning: "عائد",
-    type_new: "جديد",
-    type_inactive: "غير نشط",
+    type_returning: "عائد", type_new: "جديد", type_inactive: "غير نشط", type_imported: "مستورد",
     inactive_tooltip: "عميل غير نشط - يُفضل المتابعة",
     search: "بحث",
     total_profit: "إجمالي الربح",
     avg_profit_order: "متوسط الربح/طلب",
-    next: "التالي",
-    previous: "السابق",
-    reminders: "تذكيرات",
-    audit_log: "سجل التدقيق",
-    pdf_reports: "تقارير PDF",
-    sales_pdf: "تقرير المبيعات PDF",
-    customers_pdf: "تقرير العملاء PDF",
+    next: "التالي", previous: "السابق", reminders: "تذكيرات", audit_log: "سجل التدقيق",
+    pdf_reports: "تقارير PDF", sales_pdf: "تقرير المبيعات PDF", customers_pdf: "تقرير العملاء PDF",
     most_profitable_client: "العميل الأكثر ربحاً",
     vip: "عميل مميز",
     alert_inactive: "عملاء غير نشطين: {count}",
@@ -164,11 +152,13 @@ const translations = {
     basket_analysis: "تحليل السلة", analyze: "تحليل",
     loading_data: "جاري تحميل البيانات...",
     firebase_error: "فشل الاتصال بقاعدة البيانات. يرجى التحقق من إعدادات Firebase واتصالك بالإنترنت.",
-    // -- الترجمات الجديدة --
     customer_data_management: "إدارة بيانات العملاء",
     import_helper_text: "قم بتصدير جهات الاتصال من جوجل بصيغة Google CSV، ثم قم برفع الملف هنا.",
-    import: "استيراد",
-    delete_imported: "حذف المستوردين",
+    import: "استيراد", delete_imported: "حذف المستوردين",
+    targeted_marketing_tool: "أداة التسويق الموجهة",
+    select_a_tag: "اختر علامة للفلترة...",
+    copy_numbers: "نسخ الأرقام",
+    loyalty_points: "نقاط الولاء",
   }
 };
 
@@ -197,19 +187,14 @@ document.addEventListener("DOMContentLoaded", () => {
         checkRemindersOnLoad();
 
         onAuthStateChanged(auth, (user) => {
-            // الكود الجديد والمُنظم داخل onAuthStateChanged
-if (user) {
-    loadDataAndSetupRealtimeListener();
-    
-    // هذا هو المكان الوحيد الآن الذي يستمع لتحديثات سجل التدقيق
-    listenToAuditLogs((logs) => {
-        recentActivities = logs;
-        
-        // نرسل البيانات الجديدة لتحديث كلا المكانين في الواجهة
-        UI.updateActivityList(logs); // <--- لتحديث القائمة الجانبية
-        UI.updateDashboardAuditLog(logs); // <--- لتحديث السجل في لوحة التحكم الرئيسية
-    });
-} else {
+            if (user) {
+                loadDataAndSetupRealtimeListener();
+                listenToAuditLogs((logs) => {
+                    recentActivities = logs;
+                    UI.updateActivityList(logs);
+                
+                });
+            } else {
                 signInAnonymously(auth).catch((error) => UI.handleLoadingErrorUI(error));
             }
         });
@@ -219,49 +204,37 @@ if (user) {
 });
 
 function loadDataAndSetupRealtimeListener() {
-    // يستمع لتغييرات المبيعات بذكاء
     onSnapshot(query(salesCollection), (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-            const sale = { id: change.doc.id, ...change.doc.data() };
-            const index = salesData.findIndex(s => s.id === change.doc.id);
-
-            if (change.type === "added") {
-                if (index === -1) salesData.push(sale);
-            }
-            if (change.type === "modified") {
-                if (index > -1) salesData[index] = sale;
-            }
-            if (change.type === "removed") {
-                if (index > -1) salesData.splice(index, 1);
-            }
-        });
-
-        salesData.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const tempSales = [];
+        snapshot.forEach(doc => tempSales.push({ id: doc.id, ...doc.data() }));
+        salesData = tempSales.sort((a, b) => new Date(b.date) - new Date(a.date));
         updateAllViews();
-
     }, (error) => UI.handleLoadingErrorUI(error));
 
-    // يستمع لتغييرات العملاء بشكل منفصل
     onSnapshot(query(customersCollection), (custSnapshot) => {
-        custSnapshot.docChanges().forEach((change) => {
-            if (change.type === "removed") {
-                delete customersData[change.doc.id];
-            } else {
-                customersData[change.doc.id] = { id: change.doc.id, ...change.doc.data() };
-            }
+        const tempCustomers = {};
+        custSnapshot.forEach(doc => {
+            tempCustomers[doc.id] = { id: doc.id, ...doc.data() };
         });
-        
+        customersData = tempCustomers;
         updateAllViews();
         UI.hideLoadingOverlay();
-
     }, (error) => UI.handleLoadingErrorUI(error));
 }
 
 function updateAllViews() {
   updateCustomerAggregates();
-  
   updateSalesTable();
   updateCustomerTable();
+
+  const allTags = new Set();
+  Object.values(customersData).forEach(customer => {
+      if (customer.tags) {
+          customer.tags.forEach(tag => allTags.add(tag));
+      }
+  });
+  UI.populateTagFilterDropdown(Array.from(allTags));
+  
   UI.renderDebtManagement(salesData, markAsPaid);
   UI.updateDashboardUI(salesData, dailyGoal);
   UI.updateKpiCards(salesData, customersData);
@@ -269,170 +242,6 @@ function updateAllViews() {
   UI.updateCharts(salesData);
   checkNotifications();
   UI.setLanguage(currentLanguage);
-}
-
-function updateSalesTable() {
-    const data = filteredSales || salesData;
-    const totalPages = Math.ceil(data.length / rowsPerPage) || 1;
-    if (currentSalesPage > totalPages) currentSalesPage = totalPages;
-    const start = (currentSalesPage - 1) * rowsPerPage;
-    const paged = data.slice(start, start + rowsPerPage);
-    UI.renderSalesLog(paged, editSale, showDeleteConfirmation, {currentPage: currentSalesPage, totalPages}, (p)=>{ currentSalesPage = p; updateSalesTable(); });
-}
-
-function updateCustomerTable() {
-    const term = customerSearchTerm.toLowerCase();
-    const arr = Object.values(customersData).filter(c => {
-        return !term || (c.name && c.name.toLowerCase().includes(term)) || (c.whatsappNumber && c.whatsappNumber.toLowerCase().includes(term)) || (c.id && c.id.toLowerCase().includes(term));
-    }).sort((a,b)=> new Date(b.lastPurchase || 0) - new Date(a.lastPurchase || 0));
-    const totalPages = Math.ceil(arr.length / rowsPerPage) || 1;
-    if (currentCustomerPage > totalPages) currentCustomerPage = totalPages;
-    const start = (currentCustomerPage - 1) * rowsPerPage;
-    const paged = arr.slice(start, start + rowsPerPage);
-    UI.renderCustomerDatabase(paged, showCustomerDetails, {currentPage: currentCustomerPage, totalPages}, (p)=>{ currentCustomerPage = p; updateCustomerTable(); }, quickCreateOrder);
-}
-
-function quickCreateOrder(name, number) {
-    document.querySelector('[data-tab="sales-entry"]').click();
-    document.getElementById('clientName').value = name;
-    document.getElementById('whatsappNumber').value = number || '';
-}
-
-function addActivity(text, extra = {}) {
-    addAuditLog({
-        action: text,
-        user: auth.currentUser ? auth.currentUser.uid : 'anonymous',
-        device: navigator.userAgent,
-        ...extra
-    });
-}
-
-function addCustomerReminder(whatsapp, date, text) {
-    if (!date || !text) return;
-    if (!reminders[whatsapp]) reminders[whatsapp] = [];
-    reminders[whatsapp].push({date, text});
-    localStorage.setItem('reminders', JSON.stringify(reminders));
-    UI.showNotification('Reminder added!', 'success');
-    addActivity(`Reminder added for ${customersData[whatsapp]?.name || whatsapp}`);
-    UI.renderCustomerRemindersUI(reminders[whatsapp], whatsapp, removeCustomerReminder);
-}
-
-function removeCustomerReminder(whatsapp, index) {
-    if (!reminders[whatsapp]) return;
-    reminders[whatsapp].splice(index,1);
-    localStorage.setItem('reminders', JSON.stringify(reminders));
-    UI.renderCustomerRemindersUI(reminders[whatsapp], whatsapp, removeCustomerReminder);
-}
-
-function checkRemindersOnLoad() {
-    const today = new Date().toISOString().split('T')[0];
-    Object.entries(reminders).forEach(([whatsapp, rems]) => {
-        rems.forEach(rem => {
-            if (rem.date <= today) {
-                UI.showNotification(`Reminder: ${rem.text}`, 'warning');
-            }
-        });
-    });
-}
-
-function checkNotifications() {
-    notifications = [];
-    const inactive = Object.values(customersData).filter(c => {
-        const last = new Date(c.lastPurchase);
-        return last && !isNaN(last) && (Date.now() - last.getTime()) > 30*24*60*60*1000;
-    });
-    if (inactive.length > 0) {
-        notifications.push(translations[currentLanguage].alert_inactive.replace('{count}', inactive.length));
-    }
-    const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-    const todaySales = salesData.filter(s => s.date === todayStr).reduce((sum,s)=> sum + s.price,0);
-    const yesterdaySales = salesData.filter(s => s.date === yesterdayStr).reduce((sum,s)=> sum + s.price,0);
-    if (yesterdaySales > 0 && todaySales < yesterdaySales) {
-        notifications.push(translations[currentLanguage].alert_sales_drop);
-    }
-    const todayProfit = salesData.filter(s => s.date === todayStr).reduce((sum,s)=> sum + s.profit,0);
-    if (todayProfit < dailyGoal) {
-        notifications.push(translations[currentLanguage].alert_target_not_met);
-    }
-    UI.renderNotifications(notifications);
-}
-
-function setupEventListeners() {
-  document.querySelectorAll(".nav-link").forEach((link) => {
-    link.addEventListener("click", function () {
-      document.querySelectorAll(".nav-link").forEach((l) => l.classList.remove("active"));
-      document.getElementById("deleteImportedBtn").addEventListener("click", handleDeleteImportedCustomers);
-
-      this.classList.add("active");
-      document.querySelectorAll(".tab-content").forEach((content) => content.classList.add("hidden"));
-      document.getElementById(this.dataset.tab).classList.remove("hidden");
-      document.getElementById("importCsvBtn").addEventListener("click", handleImportCustomers);
-        const links = document.getElementById('navLinks');
-        if (window.innerWidth < 768 && links.classList.contains('max-h-96')) {
-            links.classList.add('max-h-0');
-            links.classList.remove('max-h-96');
-            const arrow = document.getElementById('mobileMenuArrow');
-            if (arrow) arrow.classList.remove('rotate-180');
-        }
-    });
-  });
-
-  document.getElementById("salesForm").addEventListener("submit", handleSaveSale);
-  document.getElementById('darkmode-toggle').addEventListener('change', handleDarkModeToggle);
-  document.getElementById("languageToggle").addEventListener("click", handleLanguageToggle);
-  document.getElementById("editGoalBtn").addEventListener("click", handleSetDailyGoal);
-  document.getElementById("exportBtn").addEventListener("click", handleExportData);
-  document.getElementById("filterSalesBtn").addEventListener("click", handleFilterSales);
-  document.getElementById("profitDateSelector").addEventListener("change", (e) => UI.updateProfitByDateUI(e.target.value, salesData));
-  document.getElementById('customerSearch').addEventListener('input', (e)=>{ customerSearchTerm = e.target.value.toLowerCase(); currentCustomerPage = 1; updateCustomerTable(); });
-  const salesPdfBtn = document.getElementById('salesPdfBtn');
-  if (salesPdfBtn) salesPdfBtn.addEventListener('click', exportSalesPDF);
-  const customersPdfBtn = document.getElementById('customersPdfBtn');
-  if (customersPdfBtn) customersPdfBtn.addEventListener('click', exportCustomersPDF);
-
-  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-  if (mobileMenuToggle) {
-      mobileMenuToggle.addEventListener('click', () => {
-          const links = document.getElementById('navLinks');
-          if (links.classList.contains('max-h-0')) {
-              links.classList.remove('max-h-0');
-              links.classList.add('max-h-96');
-          } else {
-              links.classList.add('max-h-0');
-              links.classList.remove('max-h-96');
-          }
-          document.getElementById('mobileMenuArrow').classList.toggle('rotate-180');
-      });
-  }
-    const activityOverlay = document.getElementById('activityOverlay');
-    document.getElementById('activityToggle').addEventListener('click', ()=>{
-        document.getElementById('activityPanel').classList.remove('translate-x-full');
-        if (activityOverlay) activityOverlay.classList.remove('hidden');
-    });
-    document.getElementById('closeActivity').addEventListener('click', ()=>{
-        document.getElementById('activityPanel').classList.add('translate-x-full');
-        if (activityOverlay) activityOverlay.classList.add('hidden');
-    });
-    if (activityOverlay) activityOverlay.addEventListener('click', () => {
-        document.getElementById('activityPanel').classList.add('translate-x-full');
-        activityOverlay.classList.add('hidden');
-    });
-
-  document.getElementById("closeNotification").addEventListener("click", () => document.getElementById("notification").classList.add("-translate-x-full"));
-  document.getElementById("cancelDeleteBtn").addEventListener("click", UI.hideDeleteConfirmationUI);
-  document.getElementById("closeCustomerModalBtn").addEventListener("click", UI.hideCustomerDetailsUI);
-  document.getElementById("closeCustomerModalBtn2").addEventListener("click", UI.hideCustomerDetailsUI);
-
-  document.getElementById('generatePlReportBtn').addEventListener('click', generatePLReport);
-  document.getElementById('filterInactiveBtn').addEventListener('click', filterInactiveCustomers);
-  document.getElementById('copyNumbersBtn').addEventListener('click', copyInactiveNumbers);
-  document.getElementById('exportNumbersBtn').addEventListener("click", exportInactiveNumbers);
-  document.getElementById('simulateGoalBtn').addEventListener('click', simulateGoal);
-  document.getElementById('runAnalysisBtn').addEventListener('click', analyzeBaskets);
 }
 
 async function handleSaveSale(e) {
@@ -462,31 +271,53 @@ async function handleSaveSale(e) {
     if (editingId) {
       await updateDoc(doc(db, "sales", editingId), saleData);
       UI.showNotification("Sale updated successfully!", "success");
-        addActivity(`Sale updated for ${saleData.clientName}`, { amount: saleData.price, client: saleData.clientName });
+      addActivity(`Sale updated for ${saleData.clientName}`, { amount: saleData.price, client: saleData.clientName });
     } else {
       await addDoc(salesCollection, saleData);
       UI.showNotification("Sale saved successfully!", "success");
-        addActivity(`Sale added for ${saleData.clientName}`, { amount: saleData.price, client: saleData.clientName });
+      addActivity(`Sale added for ${saleData.clientName}`, { amount: saleData.price, client: saleData.clientName });
     }
 
+    // --- منطق العملاء ونقاط الولاء الصحيح ---
     if (saleData.whatsappNumber) {
         const customerRef = doc(db, "customers", saleData.whatsappNumber);
         const customerSnap = await getDoc(customerRef);
+
         if (!customerSnap.exists()) {
+            // عميل جديد تماماً
+            const salePoints = Math.floor(saleData.price);
             await setDoc(customerRef, {
                 name: saleData.clientName,
                 whatsappNumber: saleData.whatsappNumber,
                 tags: [],
-                notes: []
+                notes: [],
+                loyaltyPoints: 250 + salePoints 
             });
             addActivity(`Customer added: ${saleData.clientName}`);
         } else {
-            if (customerSnap.data().name !== saleData.clientName) {
-                await updateDoc(customerRef, { name: saleData.clientName });
-                addActivity(`Customer edited: ${saleData.clientName}`);
-            } else {
-                await updateDoc(customerRef, { name: saleData.clientName });
+            // عميل حالي
+            const customerData = customerSnap.data();
+            let customerTags = customerData.tags || [];
+
+            // إذا كان العميل "مستورد"، قم بإزالة العلامة عند أول عملية شراء
+            if (customerTags.includes('مستورد')) {
+                customerTags = customerTags.filter(tag => tag !== 'مستورد');
             }
+
+            const isExcluded = customerTags.includes('تاجر') || customerTags.includes('يوتيوبر');
+            const currentPoints = customerData.loyaltyPoints || 0;
+            let newPoints = currentPoints;
+
+            if (!isExcluded) {
+                newPoints += Math.floor(saleData.price);
+            }
+
+            // قم بتحديث بيانات العميل
+            await updateDoc(customerRef, { 
+                name: saleData.clientName, 
+                loyaltyPoints: newPoints,
+                tags: customerTags
+            });
         }
     }
     
@@ -495,6 +326,188 @@ async function handleSaveSale(e) {
     console.error("Error saving sale: ", error);
     UI.showNotification("Error saving sale.", "error");
   }
+}
+
+// main.js - استبدل الدالة القديمة بهذه النسخة النهائية
+function updateCustomerAggregates() {
+  // تاريخ بدء احتساب نقاط الولاء
+  const loyaltyStartDate = new Date("2025-08-03");
+
+  // الخطوة 1: تصفير كل الإحصائيات قبل إعادة الحساب
+  Object.values(customersData).forEach(c => {
+      c.totalOrders = 0;
+      c.totalSpent = 0;
+      c.purchaseHistory = [];
+      c.lastPurchase = "1970-01-01";
+      // تصفير النقاط مع الحفاظ على النقاط الترحيبية المبدئية
+      c.loyaltyPoints = (c.tags?.includes('مستورد') && c.totalOrders === 0) ? 250 : 0;
+  });
+
+  // الخطوة 2: إعادة حساب كل شيء بناءً على بيانات المبيعات
+  salesData.forEach((sale) => {
+    if (sale.whatsappNumber && customersData[sale.whatsappNumber]) {
+      const customer = customersData[sale.whatsappNumber];
+
+      // تحديث الإحصائيات العامة (الإجمالي، آخر شراء، إلخ)
+      customer.totalOrders++;
+      customer.totalSpent += sale.price;
+      customer.purchaseHistory.push(sale);
+      if (new Date(sale.date) > new Date(customer.lastPurchase || "1970-01-01")) {
+        customer.lastPurchase = sale.date;
+        customer.name = sale.clientName;
+      }
+
+      // --- منطق حساب نقاط الولاء بالشروط الجديدة ---
+      const saleDate = new Date(sale.date);
+      const customerTags = customer.tags || [];
+      const isExcluded = customerTags.includes('تاجر') || customerTags.includes('يوتيوبر');
+
+      // نتحقق من الشرطين: التاريخ بعد 3 أغسطس والعميل غير مستثنى
+      if (!isExcluded && saleDate >= loyaltyStartDate) {
+          customer.loyaltyPoints += Math.floor(sale.price);
+      }
+    }
+  });
+}
+
+// --- ALL OTHER FUNCTIONS ---
+// (The rest of your functions are below, unchanged)
+
+function setupEventListeners() {
+    document.querySelectorAll(".nav-link").forEach(link => link.addEventListener("click", handleTabClick));
+    document.getElementById("salesForm").addEventListener("submit", handleSaveSale);
+    document.getElementById('darkmode-toggle').addEventListener('change', handleDarkModeToggle);
+    document.getElementById("languageToggle").addEventListener("click", handleLanguageToggle);
+    document.getElementById("filterSalesBtn").addEventListener("click", handleFilterSales);
+    document.getElementById("profitDateSelector").addEventListener("change", (e) => UI.updateProfitByDateUI(e.target.value, salesData));
+    document.getElementById('customerSearch').addEventListener('input', (e) => { customerSearchTerm = e.target.value.toLowerCase(); currentCustomerPage = 1; updateCustomerTable(); });
+    document.getElementById('salesPdfBtn')?.addEventListener('click', exportSalesPDF);
+    document.getElementById('customersPdfBtn')?.addEventListener('click', exportCustomersPDF);
+    document.getElementById('mobileMenuToggle')?.addEventListener('click', toggleMobileMenu);
+    document.getElementById('activityToggle').addEventListener('click', () => UI.toggleActivityPanel(true));
+    document.getElementById('closeActivity').addEventListener('click', () => UI.toggleActivityPanel(false));
+    document.getElementById('activityOverlay').addEventListener('click', () => UI.toggleActivityPanel(false));
+    document.getElementById("closeNotification").addEventListener("click", () => UI.hideNotification());
+    document.getElementById("cancelDeleteBtn").addEventListener("click", UI.hideDeleteConfirmationUI);
+    document.getElementById("closeCustomerModalBtn").addEventListener("click", UI.hideCustomerDetailsUI);
+    document.getElementById("closeCustomerModalBtn2").addEventListener("click", UI.hideCustomerDetailsUI);
+    document.getElementById('generatePlReportBtn')?.addEventListener('click', generatePLReport);
+    document.getElementById('filterInactiveBtn')?.addEventListener('click', filterInactiveCustomers);
+    document.getElementById('copyNumbersBtn')?.addEventListener('click', copyInactiveNumbers);
+    document.getElementById('exportNumbersBtn')?.addEventListener("click", exportInactiveNumbers);
+    document.getElementById('simulateGoalBtn')?.addEventListener('click', simulateGoal);
+    document.getElementById('runAnalysisBtn')?.addEventListener('click', analyzeBaskets);
+    document.getElementById("importCsvBtn").addEventListener("click", handleImportCustomers);
+    document.getElementById("deleteImportedBtn").addEventListener("click", handleDeleteImportedCustomers);
+    document.getElementById('clientName').addEventListener('input', handleClientNameInput);
+    document.getElementById('clientName').addEventListener('blur', () => setTimeout(() => UI.hideClientNameSuggestions(), 200));
+    document.getElementById('filterByTagBtn')?.addEventListener('click', handleFilterByTag);
+    document.getElementById('copyFilteredNumbersBtn')?.addEventListener('click', handleCopyFilteredNumbers);
+}
+
+function handleTabClick() {
+    document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+    this.classList.add("active");
+    document.querySelectorAll(".tab-content").forEach(content => content.classList.add("hidden"));
+    document.getElementById(this.dataset.tab).classList.remove("hidden");
+    const links = document.getElementById('navLinks');
+    if (window.innerWidth < 640 && links.classList.contains('max-h-96')) {
+        links.classList.add('max-h-0');
+        links.classList.remove('max-h-96');
+        const arrow = document.getElementById('mobileMenuArrow');
+        if (arrow) arrow.classList.remove('rotate-180');
+    }
+}
+
+function toggleMobileMenu() {
+    const links = document.getElementById('navLinks');
+    links.classList.toggle('max-h-0');
+    links.classList.toggle('max-h-96');
+    document.getElementById('mobileMenuArrow').classList.toggle('rotate-180');
+}
+
+function updateSalesTable() {
+    const data = filteredSales || salesData;
+    const totalPages = Math.ceil(data.length / rowsPerPage) || 1;
+    if (currentSalesPage > totalPages) currentSalesPage = totalPages;
+    const start = (currentSalesPage - 1) * rowsPerPage;
+    const paged = data.slice(start, start + rowsPerPage);
+    UI.renderSalesLog(paged, editSale, showDeleteConfirmation, {currentPage: currentSalesPage, totalPages}, (p)=>{ currentSalesPage = p; updateSalesTable(); });
+}
+
+function updateCustomerTable() {
+    const term = customerSearchTerm.toLowerCase();
+    const arr = Object.values(customersData).filter(c => !term || (c.name && c.name.toLowerCase().includes(term)) || (c.whatsappNumber && c.whatsappNumber.includes(term))).sort((a,b)=> new Date(b.lastPurchase || 0) - new Date(a.lastPurchase || 0));
+    const totalPages = Math.ceil(arr.length / rowsPerPage) || 1;
+    if (currentCustomerPage > totalPages) currentCustomerPage = totalPages;
+    const start = (currentCustomerPage - 1) * rowsPerPage;
+    const paged = arr.slice(start, start + rowsPerPage);
+    UI.renderCustomerDatabase(paged, showCustomerDetails, {currentPage: currentCustomerPage, totalPages}, (p)=>{ currentCustomerPage = p; updateCustomerTable(); }, quickCreateOrder);
+}
+
+function quickCreateOrder(name, number) {
+    document.querySelector('[data-tab="sales-entry"]').click();
+    document.getElementById('clientName').value = name;
+    document.getElementById('whatsappNumber').value = number || '';
+}
+
+function addActivity(text, extra = {}) {
+    addAuditLog({ action: text, user: auth.currentUser ? auth.currentUser.uid.slice(0,5) : 'anon', ...extra });
+}
+
+function addCustomerReminder(whatsapp, date, text) {
+    if (!date || !text) return;
+    if (!reminders[whatsapp]) reminders[whatsapp] = [];
+    reminders[whatsapp].push({date, text, done: false});
+    localStorage.setItem('reminders', JSON.stringify(reminders));
+    UI.showNotification('Reminder added!', 'success');
+    addActivity(`Reminder added for ${customersData[whatsapp]?.name || whatsapp}`);
+    UI.renderCustomerRemindersUI(reminders[whatsapp], whatsapp, removeCustomerReminder);
+}
+
+function removeCustomerReminder(whatsapp, index) {
+    if (!reminders[whatsapp]) return;
+    reminders[whatsapp].splice(index,1);
+    if(reminders[whatsapp].length === 0) delete reminders[whatsapp];
+    localStorage.setItem('reminders', JSON.stringify(reminders));
+    UI.renderCustomerRemindersUI(reminders[whatsapp], whatsapp, removeCustomerReminder);
+}
+
+function checkRemindersOnLoad() {
+    const today = new Date().toISOString().split('T')[0];
+    Object.entries(reminders).forEach(([whatsapp, rems]) => {
+        rems.forEach(rem => {
+            if (rem.date <= today && !rem.done) {
+                UI.showNotification(`Reminder: ${rem.text} for ${customersData[whatsapp]?.name || whatsapp}`, 'warning', 10000);
+            }
+        });
+    });
+}
+
+function checkNotifications() {
+    notifications = [];
+    const inactive = Object.values(customersData).filter(c => {
+        const last = new Date(c.lastPurchase);
+        return last && !isNaN(last) && (Date.now() - last.getTime()) > 30*24*60*60*1000;
+    });
+    if (inactive.length > 0) {
+        notifications.push(translations[currentLanguage].alert_inactive.replace('{count}', inactive.length));
+    }
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const todaySales = salesData.filter(s => s.date === todayStr).reduce((sum,s)=> sum + s.price,0);
+    const yesterdaySales = salesData.filter(s => s.date === yesterdayStr).reduce((sum,s)=> sum + s.price,0);
+    if (yesterdaySales > 0 && todaySales < yesterdaySales) {
+        notifications.push(translations[currentLanguage].alert_sales_drop);
+    }
+    const todayProfit = salesData.filter(s => s.date === todayStr).reduce((sum,s)=> sum + s.profit,0);
+    if (todayProfit < dailyGoal) {
+        notifications.push(translations[currentLanguage].alert_target_not_met);
+    }
+    UI.renderNotifications(notifications);
 }
 
 function editSale(saleId) {
@@ -548,46 +561,6 @@ function handleFilterSales() {
     updateSalesTable();
 }
 
-function updateCustomerAggregates() {
-  for (const id in customersData) {
-      customersData[id].totalOrders = 0;
-      customersData[id].totalSpent = 0;
-      customersData[id].purchaseHistory = [];
-      customersData[id].lastPurchase = "1970-01-01";
-  }
-
-  salesData.forEach((sale) => {
-    if (sale.whatsappNumber) {
-      if (!customersData[sale.whatsappNumber]) {
-        customersData[sale.whatsappNumber] = {
-          name: sale.clientName,
-          whatsappNumber: sale.whatsappNumber,
-          totalOrders: 0,
-          totalSpent: 0,
-          purchaseHistory: [],
-          lastPurchase: "1970-01-01",
-          tags: [],
-          notes: []
-        };
-      }
-
-      const customer = customersData[sale.whatsappNumber];
-      customer.totalOrders++;
-      customer.totalSpent += sale.price;
-
-      if (!customer.purchaseHistory) {
-          customer.purchaseHistory = [];
-      }
-      customer.purchaseHistory.push(sale);
-      
-      if (new Date(sale.date) > new Date(customer.lastPurchase || "1970-01-01")) {
-        customer.lastPurchase = sale.date;
-        customer.name = sale.clientName;
-      }
-    }
-  });
-}
-
 async function showCustomerDetails(whatsappNumber) {
     const customer = customersData[whatsappNumber];
     if (!customer) return;
@@ -598,35 +571,50 @@ async function showCustomerDetails(whatsappNumber) {
 }
 
 async function addCustomerTag(whatsapp, tag) {
-    if (!tag || !whatsapp) return;
+    if (!tag.trim() || !whatsapp) return;
+    const customerRef = doc(db, "customers", whatsapp);
     const customer = customersData[whatsapp];
-    const updatedTags = [...(customer.tags || []), tag];
-    await updateDoc(doc(db, "customers", whatsapp), { tags: updatedTags });
-    document.getElementById('newTagInput').value = '';
-    UI.showNotification("Tag added!", "success");
-    customersData[whatsapp].tags = updatedTags;
-    UI.renderCustomerTagsUI(customersData[whatsapp], removeCustomerTag);
-    addActivity(`Tag '${tag}' added to ${customer.name}`);
+    const updatedTags = [...new Set([...(customer.tags || []), tag.trim()])];
+    
+    try {
+        await updateDoc(customerRef, { tags: updatedTags });
+        customersData[whatsapp].tags = updatedTags;
+        UI.renderCustomerTagsUI(customersData[whatsapp], removeCustomerTag);
+        document.getElementById('newTagInput').value = '';
+        UI.showNotification("Tag added!", "success");
+        addActivity(`Tag '${tag}' added to ${customer.name}`);
+    } catch (error) {
+        console.error("Error adding tag:", error);
+        UI.showNotification("Failed to add tag", "error");
+    }
 }
 
 async function removeCustomerTag(whatsapp, tag) {
     if (!tag || !whatsapp) return;
+    const customerRef = doc(db, "customers", whatsapp);
     const customer = customersData[whatsapp];
-    const updatedTags = customer.tags.filter(t => t !== tag);
-    await updateDoc(doc(db, "customers", whatsapp), { tags: updatedTags });
-    UI.showNotification("Tag removed!", "success");
-    customersData[whatsapp].tags = updatedTags;
-    UI.renderCustomerTagsUI(customersData[whatsapp], removeCustomerTag);
-    addActivity(`Tag '${tag}' removed from ${customer.name}`);
+    const updatedTags = (customer.tags || []).filter(t => t !== tag);
+
+    try {
+        await updateDoc(customerRef, { tags: updatedTags });
+        customersData[whatsapp].tags = updatedTags;
+        UI.renderCustomerTagsUI(customersData[whatsapp], removeCustomerTag);
+        UI.showNotification("Tag removed!", "success");
+        addActivity(`Tag '${tag}' removed from ${customer.name}`);
+    } catch (error) {
+        console.error("Error removing tag:", error);
+        UI.showNotification("Failed to remove tag", "error");
+    }
 }
 
 async function addCustomerNote(whatsapp, text) {
-    if (!text || !whatsapp) return;
+    if (!text.trim() || !whatsapp) return;
+    const customerRef = doc(db, "customers", whatsapp);
     const customer = customersData[whatsapp];
-    const newNote = { text: text, timestamp: Date.now() };
+    const newNote = { text: text.trim(), timestamp: Date.now() };
     const updatedNotes = [...(customer.notes || []), newNote];
     try {
-        await updateDoc(doc(db, "customers", whatsapp), { notes: updatedNotes });
+        await updateDoc(customerRef, { notes: updatedNotes });
         customersData[whatsapp].notes = updatedNotes;
         UI.renderCustomerNotesUI(customersData[whatsapp]);
         document.getElementById('newNoteInput').value = '';
@@ -641,7 +629,7 @@ async function addCustomerNote(whatsapp, text) {
 function handleDarkModeToggle(event) {
   document.body.classList.toggle('dark-mode', event.target.checked);
   localStorage.setItem('darkMode', event.target.checked ? 'enabled' : 'disabled');
-  UI.updateCharts(salesData);
+  updateAllViews();
 }
 
 function handleLanguageToggle() {
@@ -657,7 +645,7 @@ function handleSetDailyGoal() {
     dailyGoal = parseFloat(newGoal);
     localStorage.setItem("dailyGoal", dailyGoal);
     UI.showNotification(translations[currentLanguage].goal_updated, "success");
-    UI.updateDashboardUI(salesData, dailyGoal);
+    updateAllViews();
   }
 }
 
@@ -672,53 +660,29 @@ function exportData(data, filename) {
     }
     const headers = Object.keys(data[0]);
     let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
-    
     data.forEach(item => {
         const row = headers.map(header => {
             let value = item[header];
-            if (typeof value === 'string' && value.includes(',')) {
-                return `"${value}"`;
-            }
-            if (Array.isArray(value)) {
-                return `"${value.join(';')}"`;
-            }
+            if (typeof value === 'string' && value.includes(',')) return `"${value}"`;
+            if (Array.isArray(value)) return `"${value.join(';')}"`;
             return value;
         }).join(',');
         csvContent += row + "\r\n";
     });
-
-    const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
+    link.href = encodeURI(csvContent);
+    link.download = filename;
     link.click();
-    document.body.removeChild(link);
 }
 
 function exportSalesPDF() {
     const { jsPDF } = window.jspdf || {};
     if (!jsPDF) return;
     const doc = new jsPDF();
-    doc.setFontSize(16);
     doc.text('Sales Report', 10, 10);
     const data = (filteredSales || salesData);
-    doc.setFontSize(12);
-    doc.text('Date', 10, 20);
-    doc.text('Client', 40, 20);
-    doc.text('Service', 90, 20);
-    doc.text('Price', 140, 20);
-    doc.text('Profit', 170, 20);
-    let y = 30;
-    data.forEach(s => {
-        if (y > 280) { doc.addPage(); y = 20; }
-        doc.text(s.date, 10, y);
-        doc.text(s.clientName || 'N/A', 40, y);
-        doc.text(s.serviceType, 90, y);
-        doc.text(Number(s.price).toFixed(2), 140, y);
-        doc.text(Number(s.profit).toFixed(2), 170, y);
-        y += 8;
-    });
+    const body = data.map(s=>[s.date, s.clientName, s.serviceType, s.price, s.profit]);
+    doc.autoTable({ head: [['Date', 'Client', 'Service', 'Price', 'Profit']], body: body });
     doc.save('sales_report.pdf');
 }
 
@@ -726,14 +690,9 @@ function exportCustomersPDF() {
     const { jsPDF } = window.jspdf || {};
     if (!jsPDF) return;
     const doc = new jsPDF();
-    doc.setFontSize(16);
     doc.text('Customers Report', 10, 10);
-    let y = 20;
-    Object.values(customersData).forEach(c => {
-        if (y > 280) { doc.addPage(); y = 20; }
-        doc.text(`${c.name} - ${c.whatsappNumber || ''} - ${c.totalSpent || 0}`, 10, y);
-        y += 8;
-    });
+    const body = Object.values(customersData).map(c=>[c.name, c.whatsappNumber, c.totalOrders, c.totalSpent]);
+    doc.autoTable({ head: [['Name', 'WhatsApp', 'Orders', 'Spent']], body: body });
     doc.save('customers_report.pdf');
 }
 
@@ -741,39 +700,30 @@ function generatePLReport() {
     const period = document.getElementById('plReportPeriod').value;
     const now = new Date();
     let startDate;
-
     if (period === 'monthly') {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    } else { // quarterly
+    } else {
         const quarter = Math.floor(now.getMonth() / 3);
         startDate = new Date(now.getFullYear(), quarter * 3, 1);
     }
-    
     const relevantSales = salesData.filter(s => new Date(s.date) >= startDate);
     const income = relevantSales.reduce((sum, s) => sum + s.price, 0);
     const expenses = relevantSales.reduce((sum, s) => sum + s.serviceCost, 0);
     const net = income - expenses;
-
     UI.updatePLReportResult(period, income, expenses, net);
 }
 
 function filterInactiveCustomers() {
     const days = parseInt(document.getElementById('inactivityDays').value) || 30;
     const threshold = Date.now() - days * 24 * 60 * 60 * 1000;
-    
-    const inactive = Object.values(customersData).filter(c => 
-        c.whatsappNumber && new Date(c.lastPurchase).getTime() < threshold
-    );
-    
+    const inactive = Object.values(customersData).filter(c => c.whatsappNumber && new Date(c.lastPurchase).getTime() < threshold);
     UI.updateInactiveCustomersList(inactive);
     UI.showNotification(`${inactive.length} inactive customers found.`, 'success');
 }
 
 function copyInactiveNumbers() {
     const listArea = document.getElementById('inactiveCustomersList');
-    navigator.clipboard.writeText(listArea.value).then(() => {
-        UI.showNotification(translations[currentLanguage].copied, 'success');
-    });
+    navigator.clipboard.writeText(listArea.value).then(() => UI.showNotification(translations[currentLanguage].copied, 'success'));
 }
 
 function exportInactiveNumbers() {
@@ -784,70 +734,55 @@ function exportInactiveNumbers() {
 
 function simulateGoal() {
     const goal = parseFloat(document.getElementById('profitGoalInput').value);
-    if (!goal) {
-        UI.updateGoalSimulatorResult(null);
-        return;
-    }
-
-    const serviceStats = {};
-    salesData.forEach((sale) => {
-        if (!serviceStats[sale.serviceType]) {
-            serviceStats[sale.serviceType] = { profit: 0, count: 0 };
-        }
-        serviceStats[sale.serviceType].profit += sale.profit;
-        serviceStats[sale.serviceType].count++;
-    });
-
+    if (!goal) return UI.updateGoalSimulatorResult(null);
+    const serviceStats = salesData.reduce((acc, sale) => {
+        if (!acc[sale.serviceType]) acc[sale.serviceType] = { profit: 0, count: 0 };
+        acc[sale.serviceType].profit += sale.profit;
+        acc[sale.serviceType].count++;
+        return acc;
+    }, {});
     UI.updateGoalSimulatorResult(goal, serviceStats);
 }
 
 function analyzeBaskets() {
-    const baskets = {};
-    salesData.forEach(sale => {
+    const baskets = salesData.reduce((acc, sale) => {
         const key = `${sale.clientName}-${sale.date}`;
-        if (!baskets[key]) baskets[key] = new Set();
-        baskets[key].add(sale.serviceType);
-    });
-
-    const pairs = {};
-    Object.values(baskets).forEach(basket => {
-        if (basket.size > 1) {
-            const items = Array.from(basket);
-            for (let i = 0; i < items.length; i++) {
-                for (let j = i + 1; j < items.length; j++) {
-                    const pair = [items[i], items[j]].sort().join(' & ');
-                    pairs[pair] = (pairs[pair] || 0) + 1;
-                }
+        if (!acc[key]) acc[key] = new Set();
+        acc[key].add(sale.serviceType);
+        return acc;
+    }, {});
+    const pairs = Object.values(baskets).filter(b => b.size > 1).reduce((acc, basket) => {
+        const items = Array.from(basket);
+        for (let i = 0; i < items.length; i++) {
+            for (let j = i + 1; j < items.length; j++) {
+                const pair = [items[i], items[j]].sort().join(' & ');
+                acc[pair] = (acc[pair] || 0) + 1;
             }
         }
-    });
-    
+        return acc;
+    }, {});
     const sortedPairs = Object.entries(pairs).sort((a,b) => b[1] - a[1]);
     UI.updateBasketAnalysisResult(sortedPairs);
 }
+
 async function handleImportCustomers() {
     const fileInput = document.getElementById('csvFileInput');
     if (fileInput.files.length === 0) {
         UI.showNotification("الرجاء اختيار ملف أولاً", "error");
         return;
     }
-
     const file = fileInput.files[0];
     const reader = new FileReader();
-
     reader.onload = async function(event) {
         const csvData = event.target.result;
         const lines = csvData.split('\n');
         const headers = lines[0].split(',').map(h => h.trim());
-
         const nameIndex = headers.findIndex(h => h.includes("Name"));
         const phoneIndex = headers.findIndex(h => h.includes("Phone 1 - Value"));
-
         if (nameIndex === -1 || phoneIndex === -1) {
             UI.showNotification("لم يتم العثور على أعمدة الاسم أو الرقم في الملف", "error");
             return;
         }
-
         const allCustomers = [];
         for (let i = 1; i < lines.length; i++) {
             const data = lines[i].split(',');
@@ -857,85 +792,98 @@ async function handleImportCustomers() {
                 allCustomers.push({ name, phone });
             }
         }
-
-        const batchSize = 400; // سنقوم بمعالجة 400 عميل في كل دفعة
+        const batchSize = 400;
         let importedCount = 0;
-        
         UI.showNotification("بدء عملية الاستيراد... قد تستغرق هذه العملية عدة دقائق.", "info");
-
         for (let i = 0; i < allCustomers.length; i += batchSize) {
             const batch = allCustomers.slice(i, i + batchSize);
-            
             const promises = batch.map(customer => {
                 const customerRef = doc(db, "customers", customer.phone);
                 return setDoc(customerRef, {
                     name: customer.name,
                     whatsappNumber: customer.phone,
-                    tags: ["مستورد"], // علامة مميزة للعملاء المستوردين
+                    tags: ["مستورد"],
+                    loyaltyPoints: 250,
                     notes: []
                 }, { merge: true });
             });
-
             await Promise.all(promises);
             importedCount += batch.length;
-            
-            // تحديث الإشعار لإظهار التقدم
             UI.showNotification(`جاري الاستيراد... تم حفظ ${importedCount} من ${allCustomers.length} عميل`, "info");
-
-            // انتظار ثانية واحدة قبل معالجة الدفعة التالية
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
-        
         UI.showNotification(`اكتمل الاستيراد بنجاح! تم حفظ ${importedCount} عميل.`, "success");
-        fileInput.value = ''; // تفريغ حقل الملف
+        fileInput.value = '';
     };
-
     reader.readAsText(file);
 }
-// main.js - أضف هذه الدالة الجديدة
+
 async function handleDeleteImportedCustomers() {
     const confirmation = confirm("هل أنت متأكد أنك تريد حذف جميع العملاء الذين تم استيرادهم؟ لا يمكن التراجع عن هذا الإجراء.");
-    if (!confirmation) {
-        return;
-    }
-
+    if (!confirmation) return;
     UI.showNotification("بدء عملية الحذف... قد تستغرق عدة دقائق.", "info");
-
     try {
-        // إنشاء استعلام لجلب العملاء الذين لديهم علامة "مستورد" فقط
         const q = query(customersCollection, where("tags", "array-contains", "مستورد"));
         const querySnapshot = await getDocs(q);
-
         const customersToDelete = querySnapshot.docs;
         const totalToDelete = customersToDelete.length;
         let deletedCount = 0;
-
         if (totalToDelete === 0) {
-            UI.showNotification("ไม่พบลูกค้าที่นำเข้าที่จะลบ", "info"); // لا يوجد عملاء مستوردون للحذف
+            UI.showNotification("لا يوجد عملاء مستوردون للحذف", "info");
             return;
         }
-
-        const batchSize = 400; // سنقوم بحذف 400 في كل دفعة
-
+        const batchSize = 400;
         for (let i = 0; i < totalToDelete; i += batchSize) {
             const batch = customersToDelete.slice(i, i + batchSize);
             const deleteBatch = writeBatch(db);
-
-            batch.forEach(docSnapshot => {
-                deleteBatch.delete(docSnapshot.ref);
-            });
-
+            batch.forEach(docSnapshot => deleteBatch.delete(docSnapshot.ref));
             await deleteBatch.commit();
             deletedCount += batch.length;
-
             UI.showNotification(`جاري الحذف... تم حذف ${deletedCount} من ${totalToDelete} عميل`, "info");
-            await new Promise(resolve => setTimeout(resolve, 1000)); // انتظار ثانية بين الدفعات
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
-
         UI.showNotification(`اكتمل الحذف بنجاح! تم حذف ${deletedCount} عميل.`, "success");
-
     } catch (error) {
         console.error("Error deleting imported customers: ", error);
         UI.showNotification("حدث خطأ أثناء عملية الحذف.", "error");
+    }
+}
+
+function handleClientNameInput(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    if (searchTerm.length < 2) {
+        UI.hideClientNameSuggestions();
+        return;
+    }
+    const customersArray = Object.values(customersData);
+    const suggestions = customersArray.filter(customer => 
+        customer.name.toLowerCase().includes(searchTerm)
+    ).slice(0, 7);
+    UI.renderClientNameSuggestions(suggestions, (selectedCustomer) => {
+        document.getElementById('clientName').value = selectedCustomer.name;
+        document.getElementById('whatsappNumber').value = selectedCustomer.whatsappNumber;
+        UI.hideClientNameSuggestions();
+    });
+}
+
+function handleFilterByTag() {
+    const selectedTag = document.getElementById('tagFilterSelect').value;
+    if (!selectedTag) {
+        UI.displayFilteredNumbers([]);
+        return;
+    }
+    const filteredCustomers = Object.values(customersData).filter(customer => 
+        customer.tags && customer.tags.includes(selectedTag)
+    );
+    const phoneNumbers = filteredCustomers.map(customer => customer.whatsappNumber);
+    UI.displayFilteredNumbers(phoneNumbers);
+}
+
+function handleCopyFilteredNumbers() {
+    const textarea = document.getElementById('filteredNumbersTextarea');
+    if (textarea.value) {
+        navigator.clipboard.writeText(textarea.value)
+            .then(() => UI.showNotification(translations[currentLanguage].copied, 'success'))
+            .catch(err => UI.showNotification('Failed to copy numbers', 'error'));
     }
 }

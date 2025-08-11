@@ -19,6 +19,15 @@
 /* 2. Body and Font Styles
   ------------------------------------
 */
+/* Universal Transitions & Active States */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+button:active, .control-btn:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
 body {
   font-family: "Cairo", sans-serif;
   color: var(--text);
@@ -67,70 +76,6 @@ header {
   border-bottom: 3px solid transparent;
 }
 
-#navLinks {
-  transform: translateX(100%);
-}
-#navLinks.max-h-96 {
-  transform: translateX(0);
-}
-
-/* Buttons */
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-primary {
-  background-color: var(--primary-light);
-  color: #fff;
-}
-.btn-primary:hover {
-  background-color: #3b82f6;
-}
-
-.btn-secondary {
-  background-color: transparent;
-  color: var(--primary-light);
-  border: 1px solid var(--primary-light);
-}
-.btn-secondary:hover {
-  background-color: var(--primary-light);
-  color: #fff;
-}
-
-.btn-danger {
-  background-color: #ef4444;
-  color: #fff;
-}
-.btn-danger:hover {
-  background-color: #dc2626;
-}
-
-/* Custom Select */
-.custom-select {
-  appearance: none;
-  background-color: inherit;
-}
-.select-arrow {
-  color: #6b7280;
-}
-.dark-mode .select-arrow {
-  color: var(--dark-text);
-}
-
-/* Table hover */
-.table-hover tbody tr:hover {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-.dark-mode .table-hover tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
 /* 5. Card Styling
   ------------------------------------
 */
@@ -155,26 +100,6 @@ header {
 /* 6. Form Input Focus Style
   ------------------------------------
 */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-textarea,
-select {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  background-color: #fff;
-}
-.dark-mode input[type="text"],
-.dark-mode input[type="number"],
-.dark-mode input[type="date"],
-.dark-mode textarea,
-.dark-mode select {
-  background-color: #1e293b;
-  border-color: #475569;
-  color: var(--dark-text);
-}
-
 input:focus,
 select:focus,
 textarea:focus {
@@ -464,4 +389,268 @@ textarea:focus {
 .dark-mode .text-gray-500,
 .dark-mode .text-black {
   color: var(--dark-text) !important;
+}
+/* ========================================= */
+/* === Autocomplete Suggestions Styles === */
+/* ========================================= */
+.suggestion-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+  background-color: #f0f0f0;
+}
+
+.dark-mode .suggestion-item:hover {
+  background-color: #475569;
+}
+/* Sales range buttons */
+.sales-range-btn { padding: 4px 8px; font-size: 12px; border: 1px solid rgba(0,0,0,.15); border-radius: 6px; background: transparent; }
+.dark-mode .sales-range-btn { border-color: rgba(255,255,255,.2); color: var(--dark-text); }
+.sales-range-btn:hover { background: rgba(0,0,0,.05); }
+.dark-mode .sales-range-btn:hover { background: rgba(255,255,255,.1); }
+/* ========================================= */
+/* === 3D Logo Text Style (Purple Theme) === */
+/* ========================================= */
+.logo-3d {
+    font-family: 'Cairo', sans-serif; /* استخدام خط أكثر أناقة */
+    font-size: 2.5rem; /* 40px */
+    font-weight: 700;
+    color: #c4b5fd; /* لون بنفسجي فاتح للنص الأساسي */
+    letter-spacing: 1px;
+    /* ظل متدرج بدرجات البنفسجي الداكن من موقعك */
+    text-shadow: 
+        1px 1px 0px #8a63d2,
+        2px 2px 0px #8a63d2,
+        3px 3px 0px #6d28d9, /* درجة أغمق قليلاً */
+        4px 4px 2px rgba(0, 0, 0, 0.25); /* ظل نهائي ناعم لإعطاء عمق */
+    transition: all 0.2s ease-in-out;
+}
+
+.logo-3d:hover {
+    transform: scale(1.05) rotate(-2deg); /* تأثير حركة بسيط عند مرور الماوس */
+}
+
+/* تعديل للهواتف ليكون حجم الخط مناسباً */
+@media (max-width: 640px) {
+    .logo-3d {
+        font-size: 2rem; /* 32px */
+    }
+}
+/* ======= 3D Red Logo ======= */
+.logo-3d{
+  --edge: #e6d3ff;     /* لمعة فوقية فاتحة */
+  --base: #c19cff;     /* بنفسجي فاتح */
+  --mid:  #8c57ff;     /* بنفسجي متوسط */
+  --dark: #3f1e86;     /* بنفسجي غامق للظل */
+  --shadow: #2a1a57;   /* لون سمك/ظل المجسّم */
+  --glow: rgba(124,77,255,.35); /* هالة بنفسجية */
+  position: relative;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: .5px;
+  font-size: clamp(28px, 5vw, 56px);
+  line-height: 1;
+  
+  /* جسم الحرف بتدرّج أحمر */
+  background: linear-gradient(180deg, var(--edge) 0%, var(--base) 35%, var(--mid) 70%, var(--dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  /* بروز/عمق (extrusion) بمجموعة ظلال قصيرة */
+  text-shadow:
+    0 .5px 0 var(--mid),
+    0 1px 0 var(--mid),
+    0 1.5px 0 var(--mid),
+    0 2px 0 var(--mid),
+    0 3px 1px rgba(0,0,0,.25),
+    0 10px 16px rgba(0,0,0,.35);
+
+  /* هالة خارجية خفيفة */
+  filter: drop-shadow(0 8px 24px var(--glow));
+}
+
+/* كتلة 3D سميكة خلف الحروف (يخلق إحساس مجسّم حقيقي) */
+.logo-3d::before{
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: var(--dark);
+  z-index: -1;
+  transform: translate(0.12em, 0.12em) skewX(-8deg);
+  opacity: .95;
+  /* “سمك” المجسّم: ظلال مكدسة */
+  text-shadow:
+    -1px 0 0 var(--dark),
+    -2px 1px 0 var(--dark),
+    -3px 2px 0 var(--dark),
+    -4px 3px 0 var(--dark),
+    -5px 4px 0 var(--dark),
+    -6px 5px 0 var(--dark),
+    -7px 6px 0 var(--dark),
+    -8px 7px 0 var(--dark);
+}
+
+/* لمعة فوقية (جلوس) */
+.logo-3d::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* ماسك يلمع الجزء العلوي */
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,.55) 0%, rgba(255,255,255,.08) 35%, transparent 60%),
+    linear-gradient( to bottom, rgba(255,255,255,.25), transparent 40% );
+  -webkit-background-clip: text;
+  background-clip: text;
+  mix-blend-mode: screen;
+}
+
+/* خط خارجي رفيع على الحواف يعطي وضوح أعلى */
+@supports (-webkit-text-stroke: 1px var(--edge)) {
+  .logo-3d{
+    -webkit-text-stroke: .6px rgba(255,255,255,.35);
+  }
+}
+
+/* أنيميشن لمعان خفيف عند الهوفر */
+.logo-3d:hover::after{
+  animation: logoShine 1200ms ease-out 1;
+}
+@keyframes logoShine{
+  0%   { background-position: -150% 0, 0 0; }
+  60%  { background-position: 50% 0, 0 0; }
+  100% { background-position: 150% 0, 0 0; }
+}
+
+/* وضع الداكن: نزود التباين */
+.dark-mode .logo-3d{
+  --glow: rgba(176, 53, 229, 0.55);
+  text-shadow:
+    0 .5px 0 var(--mid),
+    0 1px 0 var(--mid),
+    0 1.5px 0 var(--mid),
+    0 2px 0 var(--mid),
+    0 3px 1px rgba(0,0,0,.4),
+    0 14px 18px rgba(0,0,0,.6);
+}
+/* ===== Animated Background for Dark & Light Mode ===== */
+
+/* Dark Mode Background */
+body.dark-mode {
+  background: radial-gradient(1200px 600px at 80% -10%, #5432b8 0%, transparent 50%),
+              radial-gradient(900px 500px at 10% 10%, #2f1f76 0%, transparent 55%),
+              linear-gradient(135deg, #241f5a, #2c2370, #3a2e8b);
+  background-size: 100% 100%, 100% 100%, 400% 400%;
+  animation: bg-move 28s ease-in-out infinite;
+}
+
+/* Light Mode Background */
+body.light-mode {
+  background: radial-gradient(1000px 500px at 80% -10%, #d9ccff 0%, transparent 50%),
+              radial-gradient(800px 400px at 10% 10%, #f0e9ff 0%, transparent 55%),
+              linear-gradient(135deg, #f9f6ff, #f3f0ff, #e8e1ff);
+  background-size: 100% 100%, 100% 100%, 400% 400%;
+  animation: bg-move 40s ease-in-out infinite; /* أبطأ شوية في النهار */
+}
+
+@keyframes bg-move {
+  0%   { background-position: 0% 50%, 0% 50%,   0% 50%; }
+  50%  { background-position: 0% 50%, 0% 50%, 100% 50%; }
+  100% { background-position: 0% 50%, 0% 50%,   0% 50%; }
+}
+
+/* ===== Cards Styling for Both Modes ===== */
+
+/* Dark mode cards */
+.dark-mode .stat-card {
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* Light mode cards */
+.light-mode .stat-card {
+  background: linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,.015));
+  border: 1px solid rgba(0,0,0,.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* Hover effect (both modes) */
+.stat-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* الأنيميشن يتم تطبيقه من كلاس آخر الآن، لا نحتاجه هنا */
+}
+.stat-card:hover {
+  transform: translateY(-6px); /* زيادة التأثير قليلاً */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+.dark-mode .stat-card:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== Logo Glow for Both Modes ===== */
+
+/* Dark mode logo */
+.dark-mode .logo-3d {
+  filter: drop-shadow(0 6px 14px rgba(124,77,255,.4));
+}
+
+/* Light mode logo */
+.light-mode .logo-3d {
+  filter: drop-shadow(0 4px 8px rgba(124,77,255,.25));
+}
+/* ===== Reveal Animation for Cards & Sections ===== */
+
+/* الأقسام الرئيسية */
+/* Reveal Animation for Main Tabs */
+.tab-content {
+  animation: content-reveal 0.5s ease-out forwards;
+}
+
+@keyframes content-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* الكروت */
+.stat-card {
+  animation: card-reveal 0.5s ease-out both;
+}
+
+/* حركة الأقسام */
+@keyframes section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* حركة الكروت */
+@keyframes card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

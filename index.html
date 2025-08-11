@@ -33,62 +33,28 @@
     </div>
 
     <div class="container mx-auto px-4 py-8 relative z-10">
-      <header class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 pb-4">
-        <div class="flex items-center justify-center sm:justify-start">
-          <img
-            src="image_fx_.jpg"
-            alt="شعار متتبع المبيعات الرقمي"
-            class="logo-img mr-4"
-          />
-          <h1 class="text-2xl font-bold" data-translate="app_title">
-            متتبع مبيعات عبقر
-          </h1>
-        </div>
-        <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-4 sm:mt-0">
-          <button
-            id="languageToggle"
-            class="btn btn-secondary"
-          >
-            EN/AR
-          </button>
+      <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 z-30">
+    <div class="order-1 sm:absolute sm:left-1/2 sm:-translate-x-1/2">
+         <h1 class="logo-3d" data-text="3abqar">3abqar</h1>
+    </div>
 
-          <div class="dark-mode-toggle-container">
+    <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-4 order-2 mt-4 sm:mt-0">
+        <button id="languageToggle" class="control-btn">EN/AR</button>
+        <div class="dark-mode-toggle-container">
             <input type="checkbox" id="darkmode-toggle" />
             <label for="darkmode-toggle">
-                <svg class="sun" version="1.1" viewBox="0 0 496 496" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M248,88c-88.224,0-160,71.776-160,160s71.776,160,160,160s160-71.776,160-160S336.224,88,248,88z M248,392 c-79.4,0-144-64.6-144-144s64.6-144,144-144s144,64.6,144,144S327.4,392,248,392z"/><rect width="16" height="72" x="240"/><rect width="71.999" height="16" x="62.097" y="90.096" transform="matrix(0.7071 0.7071 -0.7071 0.7071 98.0963 -40.6334)"/><rect y="240" width="72" height="16"/><rect width="16" height="71.999" x="90.091" y="361.915" transform="matrix(-0.7071 -0.7071 0.7071 -0.7071 -113.9157 748.643)"/><rect x="240" y="424" width="16" height="72"/><rect width="71.999" height="16" x="361.881" y="389.915" transform="matrix(-0.7071 -0.7071 0.7071 -0.7071 397.8562 960.6281)"/><rect x="424" y="240" width="72" height="16"/><rect width="16" height="71.999" x="389.911" y="62.091" transform="matrix(0.7071 0.7071 -0.7071 0.7071 185.9067 -252.6357)"/></svg>
-                <svg class="moon" version="1.1" viewBox="0 0 49.739 49.739" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M25.068,48.889c-9.173,0-18.017-5.06-22.396-13.804C-3.373,23.008,1.164,8.467,13.003,1.979l2.061-1.129l-0.615,2.268 c-1.479,5.459-0.899,11.25,1.633,16.306c2.75,5.493,7.476,9.587,13.305,11.526c5.831,1.939,12.065,1.492,17.559-1.258v0 c0.25-0.125,0.492-0.258,0.734-0.391l2.061-1.13l-0.585,2.252c-1.863,6.873-6.577,12.639-12.933,15.822 C32.639,48.039,28.825,48.888,25.068,48.889z M12.002,4.936c-9.413,6.428-12.756,18.837-7.54,29.253 c5.678,11.34,19.522,15.945,30.864,10.268c5.154-2.582,9.136-7.012,11.181-12.357c-5.632,2.427-11.882,2.702-17.752,0.748 c-6.337-2.108-11.473-6.557-14.463-12.528C11.899,15.541,11.11,10.16,12.002,4.936z"/></svg>
+                <svg class="sun" viewBox="0 0 496 496" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M248,88c-88.224,0-160,71.776-160,160s71.776,160,160,160s160-71.776,160-160S336.224,88,248,88z M248,392 c-79.4,0-144-64.6-144-144s64.6-144,144-144s144,64.6,144,144S327.4,392,248,392z"/><rect width="16" height="72" x="240"/><rect width="71.999" height="16" x="62.097" y="90.096" transform="matrix(0.7071 0.7071 -0.7071 0.7071 98.0963 -40.6334)"/><rect y="240" width="72" height="16"/><rect width="16" height="71.999" x="90.091" y="361.915" transform="matrix(-0.7071 -0.7071 0.7071 -0.7071 -113.9157 748.643)"/><rect x="240" y="424" width="16" height="72"/><rect width="71.999" height="16" x="361.881" y="389.915" transform="matrix(-0.7071 -0.7071 0.7071 -0.7071 397.8562 960.6281)"/><rect x="424" y="240" width="72" height="16"/><rect width="16" height="71.999" x="389.911" y="62.091" transform="matrix(0.7071 0.7071 -0.7071 0.7071 185.9067 -252.6357)"/></svg>
+                <svg class="moon" viewBox="0 0 49.739 49.739" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M25.068,48.889c-9.173,0-18.017-5.06-22.396-13.804C-3.373,23.008,1.164,8.467,13.003,1.979l2.061-1.129l-0.615,2.268 c-1.479,5.459-0.899,11.25,1.633,16.306c2.75,5.493,7.476,9.587,13.305,11.526c5.831,1.939,12.065,1.492,17.559-1.258v0 c0.25-0.125,0.492-0.258,0.734-0.391l2.061-1.13l-0.585,2.252c-1.863,6.873-6.577,12.639-12.933,15.822 C32.639,48.039,28.825,48.888,25.068,48.889z M12.002,4.936c-9.413,6.428-12.756,18.837-7.54,29.253 c5.678,11.34,19.522,15.945,30.864,10.268c5.154-2.582,9.136-7.012,11.181-12.357c-5.632,2.427-11.882,2.702-17.752,0.748 c-6.337-2.108-11.473-6.557-14.463-12.528C11.899,15.541,11.11,10.16,12.002,4.936z"/></svg>
             </label>
-          </div>
-          <button
-            id="activityToggle"
-            class="btn btn-secondary flex items-center"
-          >
+        </div>
+        <button id="activityToggle" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center shadow-md hover:shadow-lg transition-shadow">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
-            <span data-translate="audit_log">Activity</span>
-          </button>
-          <button
-            id="exportBtn"
-            class="btn btn-primary flex items-center"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 ml-2"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            <span data-translate="export">Export</span>
-          </button>
-        </div>
-      </header>
-
+            <span data-translate="audit_log"></span>
+        </button>
+    </div>
+</header>
       <nav class="border-b border-gray-200 dark:border-gray-700 mb-8">
         <div class="flex justify-between items-center sm:hidden">
           <button
@@ -118,7 +84,7 @@
         </div>
         <div
           id="navLinks"
-          class="fixed top-0 right-0 h-full w-64 bg-white dark:bg-slate-800 transform translate-x-full max-h-0 overflow-y-auto transition-transform duration-300 sm:static sm:h-auto sm:w-auto sm:translate-x-0 sm:max-h-none sm:overflow-visible sm:flex sm:flex-row"
+          class="flex flex-col sm:flex sm:flex-row max-h-0 sm:max-h-none overflow-hidden transition-all duration-300"
         >
           <button
             data-tab="dashboard"
@@ -295,7 +261,7 @@
               </h3>
               <div class="overflow-x-auto">
                 <table
-                  class="min-w-full divide-y divide-gray-200 dark:divide-slate-700 table-hover"
+                  class="min-w-full divide-y divide-gray-200 dark:divide-slate-700"
                 >
                   <thead class="bg-gray-50 dark:bg-slate-700">
                     <tr>
@@ -340,10 +306,7 @@
             </div>
             </div>
 
-            <section class="audit-log">
-              <h2 data-translate="audit_log">Audit Log</h2>
-              <ul id="audit-log-body"></ul>
-            </section>
+            
 
         </div>
         
@@ -364,18 +327,13 @@
                                     </div>
                                     <div>
                                         <label for="serviceType" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1" data-translate="service_type">Service Type</label>
-                                        <div class="relative">
-                                            <select id="serviceType" name="serviceType" class="custom-select w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white pr-8">
-                                                <option value="" data-translate="select_service_type">Select Service Type</option>
-                                                <option value="Followers Boosting">Followers Boosting</option>
-                                                <option value="Game Top-Up">Game Top-Up</option>
-                                                <option value="Offers">Offers</option>
-                                                <option value="Other">Other</option>
-                                            </select>
-                                            <span class="select-arrow pointer-events-none absolute inset-y-0 right-2 flex items-center">
-                                                <svg class="h-4 w-4 text-gray-500 dark:text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                                            </span>
-                                        </div>
+                                        <select id="serviceType" name="serviceType" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white">
+                                            <option value="" data-translate="select_service_type">Select Service Type</option>
+                                            <option value="Followers Boosting">Followers Boosting</option>
+                                            <option value="Game Top-Up">Game Top-Up</option>
+                                            <option value="Offers">Offers</option>
+                                            <option value="Other">Other</option>
+                                        </select>
                                     </div>
                                     <div>
                                         <label for="price" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1" data-translate="price">Price</label>
@@ -386,32 +344,29 @@
                                         <input type="number" id="serviceCost" name="serviceCost" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white" placeholder="0.00" />
                                     </div>
                                 </div>
-                                <div>
-                                    <label for="clientName" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1" data-translate="client_name">Client Name (Optional)</label>
-                                    <input type="text" id="clientName" name="clientName" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white" placeholder="John Doe" />
-                                </div>
+                                <div class="relative">
+    <label for="clientName" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1" data-translate="client_name"></label>
+    <input type="text" id="clientName" name="clientName" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white" placeholder="John Doe" autocomplete="off" />
+    <div id="clientNameSuggestions" class="absolute z-10 w-full bg-white dark:border dark:border-slate-500 dark:bg-slate-600 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto">
+        </div>
+</div>
                                 <div>
                                     <label for="whatsappNumber" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1" data-translate="whatsapp_number">WhatsApp Number (Optional)</label>
                                     <input type="text" id="whatsappNumber" name="whatsappNumber" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white" placeholder="+201234567890" />
                                 </div>
                                 <div>
                                     <label for="paymentStatus" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1" data-translate="payment_status">Payment Status</label>
-                                    <div class="relative">
-                                        <select id="paymentStatus" name="paymentStatus" class="custom-select w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white pr-8">
-                                            <option value="paid" data-translate="paid">Paid</option>
-                                            <option value="unpaid" data-translate="unpaid">Unpaid</option>
-                                        </select>
-                                        <span class="select-arrow pointer-events-none absolute inset-y-0 right-2 flex items-center">
-                                            <svg class="h-4 w-4 text-gray-500 dark:text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                                        </span>
-                                    </div>
+                                    <select id="paymentStatus" name="paymentStatus" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white">
+                                        <option value="paid" data-translate="paid">Paid</option>
+                                        <option value="unpaid" data-translate="unpaid">Unpaid</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1" data-translate="notes">Notes (Optional)</label>
                                     <textarea id="notes" name="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white" placeholder="Any additional notes..."></textarea>
                                 </div>
                                 <div class="flex justify-end">
-                                    <button type="submit" class="btn btn-primary" data-translate="save_sale">
+                                    <button type="submit" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" data-translate="save_sale">
                                         Save Sale
                                     </button>
                                 </div>
@@ -428,11 +383,11 @@
                                 <div class="flex items-center gap-2">
                                     <input type="date" id="startDateFilter" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white">
                                     <input type="date" id="endDateFilter" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white">
-                                    <button id="filterSalesBtn" class="btn btn-primary" data-translate="filter">Filter</button>
+                                    <button id="filterSalesBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" data-translate="filter">Filter</button>
                                 </div>
                             </div>
                             <div class="overflow-x-auto mt-6">
-                                <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700 table-hover">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                                     <thead class="bg-gray-50 dark:bg-slate-700">
                                         <tr>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase" data-translate="date">Date</th>
@@ -476,7 +431,7 @@
               </div>
               <div class="overflow-x-auto mt-6">
                 <table
-                  class="min-w-full divide-y divide-gray-200 dark:divide-slate-700 table-hover"
+                  class="min-w-full divide-y divide-gray-200 dark:divide-slate-700"
                 >
                   <thead class="bg-gray-50 dark:bg-slate-700">
                     <tr>
@@ -545,7 +500,7 @@
               </h2>
               <div class="overflow-x-auto mt-6">
                 <table
-                  class="min-w-full divide-y divide-gray-200 dark:divide-slate-700 table-hover"
+                  class="min-w-full divide-y divide-gray-200 dark:divide-slate-700"
                 >
                   <thead class="bg-gray-50 dark:bg-slate-700">
                     <tr>
@@ -588,6 +543,19 @@
 
         <div id="reports" class="tab-content hidden">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="stat-card rounded-lg p-6">
+    <h3 class="text-lg font-bold mb-4" data-translate="targeted_marketing_tool">أداة التسويق الموجهة</h3>
+    <div class="flex items-center gap-4 mb-4">
+        <select id="tagFilterSelect" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white">
+            <option value="" data-translate="select_a_tag">اختر علامة للفلترة...</option>
+            </select>
+        <button id="filterByTagBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" data-translate="filter">فلترة</button>
+    </div>
+    <textarea id="filteredNumbersTextarea" readonly class="w-full h-32 p-2 border rounded-md dark:bg-slate-800 dark:border-slate-600" placeholder="أرقام هواتف العملاء المطابقين للفلتر ستظهر هنا..."></textarea>
+    <div class="flex gap-2 mt-2">
+        <button id="copyFilteredNumbersBtn" class="px-3 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600" data-translate="copy_numbers">نسخ الأرقام</button>
+    </div>
+</div>
                 <div class="stat-card rounded-lg p-6">
                     <h3 class="text-lg font-bold mb-4" data-translate="pl_reports">P&L Reports</h3>
                     <div class="flex items-center gap-4 mb-4">
@@ -595,53 +563,55 @@
                             <option value="monthly" data-translate="monthly">Monthly</option>
                             <option value="quarterly" data-translate="quarterly">Quarterly</option>
                         </select>
-                        <button id="generatePlReportBtn" class="btn btn-primary" data-translate="generate">Generate</button>
+                        <button id="generatePlReportBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" data-translate="generate">Generate</button>
                     </div>
                     <div id="plReportResult" class="hidden mt-4 p-4 border rounded-md dark:border-slate-600">
                         </div>
                 </div>
-                <div class="stat-card rounded-lg p-6">
-                    <h3 class="text-lg font-bold mb-4" data-translate="customer_data_management"></h3>
-                    <p class="text-sm text-gray-600 dark:text-slate-400 mb-4" data-translate="import_helper_text"></p>
-                    <div class="flex flex-col sm:flex-row items-center gap-4">
-                        <input type="file" id="csvFileInput" accept=".csv" class="flex-grow w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white">
-                        <div class="flex-shrink-0 flex gap-2 w-full sm:w-auto">
-                             <button id="importCsvBtn" class="w-full sm:w-auto btn btn-primary" data-translate="import"></button>
-                             <button id="deleteImportedBtn" class="w-full sm:w-auto btn btn-danger" data-translate="delete_imported"></button>
-                        </div>
-                    </div>
-                </div>
+<div class="stat-card rounded-lg p-6 mt-6">
+    <h3 class="text-lg font-bold mb-4" data-translate="customer_data_management"></h3>
+    <p class="text-sm text-gray-600 dark:text-slate-400 mb-4" data-translate="import_helper_text"></p>
+    <div class="flex flex-col sm:flex-row items-center gap-4">
+        <input type="file" id="csvFileInput" accept=".csv" class="flex-grow w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white">
+        <div class="flex-shrink-0 flex gap-2 w-full sm:w-auto">
+             <button id="importCsvBtn" class="w-full sm:w-auto px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600" data-translate="import"></button>
+             <button id="deleteImportedBtn" class="w-full sm:w-auto px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600" data-translate="delete_imported"></button>
+        </div>
+    </div>
+</div>
                 <div class="stat-card rounded-lg p-6">
                     <h3 class="text-lg font-bold mb-4" data-translate="whatsapp_marketing">WhatsApp Marketing</h3>
                     <div class="flex items-center gap-4 mb-4">
                         <input type="number" id="inactivityDays" value="30" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white">
-                        <button id="filterInactiveBtn" class="btn btn-primary" data-translate="filter">Filter</button>
+                        <button id="filterInactiveBtn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600" data-translate="filter">Filter</button>
                     </div>
                     <textarea id="inactiveCustomersList" readonly class="w-full h-24 p-2 border rounded-md dark:bg-slate-700 dark:border-slate-600" data-translate="inactive_customers_placeholder" placeholder="Inactive customer numbers will appear here..."></textarea>
                     <div class="flex gap-2 mt-2">
-                        <button id="copyNumbersBtn" class="btn btn-secondary text-sm" data-translate="copy">Copy</button>
-                        <button id="exportNumbersBtn" class="btn btn-secondary text-sm" data-translate="export">Export</button>
+                        <button id="copyNumbersBtn" class="px-3 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600" data-translate="copy">Copy</button>
+                        <button id="exportNumbersBtn" class="px-3 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600" data-translate="export">Export</button>
                     </div>
                 </div>
                 <div class="stat-card rounded-lg p-6">
                     <h3 class="text-lg font-bold mb-4" data-translate="pdf_reports">PDF Reports</h3>
                     <div class="flex gap-2">
-                        <button id="salesPdfBtn" class="btn btn-primary" data-translate="sales_pdf">Sales PDF</button>
-                        <button id="customersPdfBtn" class="btn btn-primary" data-translate="customers_pdf">Customers PDF</button>
+                        <button id="salesPdfBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" data-translate="sales_pdf">Sales PDF</button>
+                        <button id="customersPdfBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" data-translate="customers_pdf">Customers PDF</button>
                     </div>
                 </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <div class="stat-card rounded-lg p-6">
                     <h3 class="text-lg font-bold mb-4" data-translate="goal_simulator">Financial Goal Simulator</h3>
                     <div class="flex items-center gap-4 mb-4">
                         <input type="number" id="profitGoalInput" placeholder="Enter profit goal" class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm dark:bg-slate-700 dark:text-white" data-translate="profit_goal_placeholder">
-                        <button id="simulateGoalBtn" class="btn btn-primary" data-translate="calculate">Calculate</button>
+                        <button id="simulateGoalBtn" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600" data-translate="calculate">Calculate</button>
                     </div>
                     <div id="goalSimulatorResult" class="mt-4 text-sm"></div>
                 </div>
                 <div class="stat-card rounded-lg p-6">
                      <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-bold" data-translate="basket_analysis">Basket Analysis</h3>
-                        <button id="runAnalysisBtn" class="btn btn-primary text-sm" data-translate="analyze">Analyze</button>
+                        <button id="runAnalysisBtn" class="px-4 py-2 text-sm bg-teal-500 text-white rounded-md hover:bg-teal-600" data-translate="analyze">Analyze</button>
                     </div>
                     <div id="basketAnalysisResult" class="mt-4 text-sm"></div>
                 </div>
@@ -715,20 +685,37 @@
           <div><strong data-translate="total_spent">Total Spent:</strong> <span id="modalCustomerTotalSpent"></span></div>
           <div><strong data-translate="total_profit">Total Profit:</strong> <span id="modalCustomerTotalProfit"></span></div>
           <div><strong data-translate="avg_profit_order">Avg Profit/Order:</strong> <span id="modalCustomerAvgProfit"></span></div>
+        <div class="flex items-center gap-2 col-span-1 md:col-span-2">
+  <strong data-translate="loyalty_points">نقاط الولاء:</strong>
+  <span id="modalCustomerLoyaltyPoints" class="font-bold text-lg text-yellow-500">0</span>
+
+  <!-- زر واتساب -->
+  <button id="sendPointsBtn" class="text-green-500 hover:text-green-600" title="إرسال النقاط عبر واتساب">
+    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
+      <path d="M16 0C7.163 0 0 7.163 0 16c0 2.837.74 5.51 2.029 7.844L0 32l8.363-2.19A15.901 15.901 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0z"/>
+      <path d="M24.26 22.04c-.37.94-2.16 1.79-2.97 1.91-.76.11-1.74.16-2.81-.17-.65-.21-1.48-.48-2.55-.94-4.49-1.95-7.4-6.52-7.63-6.82-.23-.3-1.82-2.42-1.82-4.62s1.15-3.27 1.56-3.72c.41-.45.9-.56 1.2-.56.3 0 .6 0 .86.02.27.01.65-.11 1.02.78.37.89 1.26 3.07 1.37 3.29.11.23.18.5.04.8-.23.49-.35.8-.7 1.23-.23.28-.48.63-.2 1.2.28.56 1.24 2.05 2.66 3.32 1.83 1.63 3.36 2.14 3.92 2.37.56.23.89.2 1.22-.12.33-.32 1.4-1.64 1.78-2.2.37-.56.74-.47 1.22-.28.49.19 3.09 1.45 3.62 1.72.53.27.88.4 1 .62.23 .12 1.34-.25 2.27 0z" fill="#fff"/>
+    </svg>
+  </button>
+
+  <!-- زر نسخ الرسالة -->
+  <button id="copyPointsBtn" class="text-blue-500 hover:text-blue-600" title="نسخ الرسالة">📋</button>
+</div>
+
         </div>
         <div class="mt-4 bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
-          <strong class="block" data-translate="tags">Tags:</strong>
-          <div id="modalCustomerTags" class="flex flex-wrap gap-2 mt-2"></div>
-          <div class="flex gap-2 mt-2">
-            <input type="text" id="newTagInput" class="w-full px-3 py-1 text-sm border-gray-300 dark:border-slate-600 rounded-md dark:bg-slate-700" placeholder="New tag...">
-            <button id="addTagBtn" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600" data-translate="add">Add</button>
-          </div>
-        </div>
+  <strong class="block mb-2" data-translate="tags"></strong>
+  <div id="modalCustomerTags" class="flex flex-wrap gap-2">
+    </div>
+  <div class="flex gap-2 mt-3">
+    <input type="text" id="newTagInput" class="w-full px-3 py-1 text-sm border-gray-300 dark:border-slate-600 rounded-md dark:bg-slate-800" placeholder="New tag...">
+    <button id="addTagBtn" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600" data-translate="add"></button>
+  </div>
+</div>
         <div class="mt-6 grid grid-cols-1 gap-6">
           <div class="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
             <h4 class="text-md font-medium dark:text-white" data-translate="purchase_history">Purchase History</h4>
             <div class="overflow-y-auto max-h-48 mt-2 border dark:border-slate-700 rounded-lg">
-              <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700 table-hover">
+              <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                 <thead class="bg-gray-50 dark:bg-slate-700 sticky top-0">
                   <tr>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase" data-translate="date">Date</th>

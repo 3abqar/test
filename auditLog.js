@@ -1,4 +1,5 @@
-// auditLog.js
+// auditLog.js - الكود الصحيح
+
 import { 
   db, 
   collection, 
@@ -9,6 +10,7 @@ import {
   orderBy, 
   serverTimestamp 
 } from "./firebase.js";
+
 // إضافة سجل جديد
 export async function addAuditLog(data) {
   const id = Date.now().toString(); // ID فريد

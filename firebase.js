@@ -25,13 +25,10 @@ const auth = getAuth(app);
 
 const salesCollection = collection(db, 'sales');
 const customersCollection = collection(db, 'customers');
+const servicesCollection = collection(db, 'services');
 
 export {
-  db, auth, salesCollection, customersCollection, onSnapshot, addDoc, doc,
-  deleteDoc, updateDoc, getDoc, setDoc, query, onAuthStateChanged,
-  signInAnonymously, orderBy, serverTimestamp, collection,
-  // --- الإضافات الجديدة ---
-  where, 
-  getDocs, 
-  writeBatch
+  db, auth, salesCollection, customersCollection, servicesCollection, // <-- أضفها هنا
+  onSnapshot, addDoc, doc, deleteDoc, updateDoc, getDoc, setDoc, query, 
+  where, getDocs, writeBatch, onAuthStateChanged, signInAnonymously 
 };
